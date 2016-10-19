@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config'])
+angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'demoQueryModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
@@ -22,18 +22,33 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config'])
       }
 
       // Initialize forceng
-      force.init(forcengOptions);
+      var oauthPlugin = cordova.require("com.salesforce.plugin.oauth");
+      oauthPlugin.getAuthCredentials(function(creds) {
+          console.log("auth plugin got details");
+          console.log(creds);
+         force.init({
+             appId: creds.clientId,
+             apiVersion: 'v36.0',
+             instanceUrl: creds.instanceUrl,
+             accessToken: creds.accessToken,
+             refreshToken: creds.refreshToken
+         });
+
+        //  var forceClient = new forcetk.Client(creds.clientId, creds.loginUrl);
+        //  forceClient.setSessionToken(creds.accessToken, "v36.0", creds.instanceUrl);
+        //  forceClient.setRefreshToken(creds.refreshToken);
+      });
 
       if (forcengOptions.accessToken) {
         // If the accessToken was provided (typically when running the app from within a Visualforce page,
         // go straight to the contact list
-        $state.go('app.contactlist');
+        $state.go('app.demoquery');
       } else {
         // Otherwise (the app is probably running as a standalone web app or as a hybrid local app with the
         // Mobile SDK, login first.)
         force.login().then(
           function () {
-            $state.go('app.contactlist');
+            $state.go('app.demoquery');
           },
           function(error) {
             alert("Login was not successful");
@@ -69,53 +84,11 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config'])
           }
         }
       })
-
-      .state('app.contact', {
-        url: "/contacts/:contactId",
+      .state('app.demoquery', {
+        url: "/demoquery",
         views: {
           'menuContent': {
-            templateUrl: baseURL + "templates/contact.html",
-            controller: 'ContactCtrl'
-          }
-        }
-      })
-
-      .state('app.edit-contact', {
-        url: "/edit-contact/:contactId",
-        views: {
-          'menuContent': {
-            templateUrl: baseURL + "templates/edit-contact.html",
-            controller: 'EditContactCtrl'
-          }
-        }
-      })
-
-      .state('app.add-contact', {
-        url: "/create-contact",
-        views: {
-          'menuContent': {
-            templateUrl: baseURL + "templates/edit-contact.html",
-            controller: 'CreateContactCtrl'
-          }
-        }
-      })
-
-      .state('app.accountlist', {
-        url: "/accountlist",
-        views: {
-          'menuContent': {
-            templateUrl: baseURL + "templates/account-list.html",
-            controller: 'AccountListCtrl'
-          }
-        }
-      })
-
-      .state('app.account', {
-        url: "/accounts/:accountId",
-        views: {
-          'menuContent': {
-            templateUrl: baseURL + "templates/account.html",
-            controller: 'AccountCtrl'
+            templateUrl: baseURL + "templates/demo-query.html"
           }
         }
       });
