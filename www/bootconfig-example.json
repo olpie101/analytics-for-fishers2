@@ -1,0 +1,14 @@
+{
+  "remoteAccessConsumerKey": "your_key_here",
+  "oauthRedirectURI": "your_url_here",
+  "oauthScopes": [
+    "web",
+    "api"
+  ],
+  "isLocal": true,
+  "startPage": "index.html",
+  "errorPage": "error.html",
+  "shouldAuthenticate": true,
+  "attemptOfflineLoad": false,
+  "androidPushNotificationClientId": ""
+}
