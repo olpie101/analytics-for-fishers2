@@ -19,13 +19,9 @@
         }
 
         const handlerResponse = function(result){
-            console.log("result received");
-            console.log(result);
             responseData = result.records;
             ctrl.months = responseData.map(record => record.year+" "+record.month);
 
-            console.log("#### updating time items items");
-            console.log(ctrl.months);
             if(ctrl.months.length > 0){
                 ctrl.selected = ctrl.months[0];
                 ctrl.monthChange(ctrl.months[0]);
@@ -35,7 +31,6 @@
 
         //month selection has been changed
         ctrl.monthChange = function(selection) {
-            console.log("month change");
             selectedMonth = selection.split(" ");
             updateData();
         }
@@ -44,8 +39,6 @@
             if(renderGraph == false){
                 return;
             }
-            console.log("selected month => "+selectedMonth);
-            console.log("selected calculation method => "+selectedCalculationMethod);
 
             Rx.Observable.from(responseData)
                 // .filter(info => info.month == selectedMonth)
@@ -60,8 +53,7 @@
                     console.log(data);
                     ctrl.dataMap = data;
                     ctrl.xTitle = "Species";
-                    ctrl.yTitle = "Quantity"
-                    console.log($window.innerWidth+" x "+$window.innerHeight);
+                    ctrl.yTitle = "Quantity";
                 });
         }
 
