@@ -1,0 +1,24 @@
+<div>
+    <!-- <double-sided-toggle left-option="Weight" right-option="Quantity"
+        label="Calculate By:"
+        on-change="$ctrl.calculationToggleChange(value)"></double-sided-toggle>
+    <br/> -->
+
+    <div class="list">
+      <label class="item item-input item-select">
+        <div class="input-label">
+          Select Month:
+        </div>
+        <select ng-model="$ctrl.selected" ng-options="month for month in $ctrl.months"
+                ng-change="$ctrl.monthChange($ctrl.selected)"></select>
+      </label>
+    </div>
+
+    <br/>
+
+    <div class = " ">
+        <stacked-bar-chart data="$ctrl.dataMap" xtitle="$ctrl.xTitle" ytitle="$ctrl.yTitle"
+                            width=300 height=400></stacked-bar-chart>
+    </div>
+    <!-- <loading-overlay loading="$ctrl.loading"></loading-overlay> -->
+</div>

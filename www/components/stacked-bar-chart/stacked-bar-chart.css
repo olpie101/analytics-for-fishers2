@@ -1,0 +1,32 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: darkgray;
+  shape-rendering: crispEdges;
+  stroke-width: 2;
+}
+
+.x.path {
+  display: none;
+}
+
+/*.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 4;
+}*/
+
+/*path {
+  fill: none;
+  stroke: #000;
+}*/
+
+.grid path {
+    stroke: #0f0;
+    stroke-width: 2px;
+}
+
+.grid line {
+    stroke: #f93;
+    stroke-width: 2px;
+}

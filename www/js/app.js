@@ -4,7 +4,9 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'demoQueryModule'])
+angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
+                'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
+                'utilsModule', 'demoQueryModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
@@ -89,6 +91,14 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         views: {
           'menuContent': {
             templateUrl: baseURL + "templates/demo-query.html"
+          }
+        }
+      })
+      .state('app.catchtimeperiod', {
+        url: "/catch-by-time-period",
+        views: {
+          'menuContent': {
+            templateUrl: baseURL + "templates/catch-by-time-period.html"
           }
         }
       });
