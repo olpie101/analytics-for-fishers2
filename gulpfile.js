@@ -6,6 +6,7 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
+var babel = require('gulp-babel');
 
 var paths = {
   sass: ['./scss/**/*.scss']
@@ -48,4 +49,26 @@ gulp.task('git-check', function(done) {
     process.exit(1);
   }
   done();
+});
+
+gulp.task('babel', function() {
+    var path = require('path');
+    const dist = "www/dist";
+    const componentsDist = path.join(dist, "components");
+    const jsDist = path.join(dist, "js")
+    sh.rm('-rf', dist);
+    gulp.src('www/components/**/*.js')
+        .pipe(babel({
+            presets: ['es2015']
+        }))
+        .pipe(gulp.dest(componentsDist));
+
+    gulp.src('www/components/**/*.html')
+        .pipe(gulp.dest(componentsDist));
+
+    gulp.src('www/js/**/*.js')
+        .pipe(babel({
+            presets: ['es2015']
+        }))
+        .pipe(gulp.dest(jsDist));
 });
