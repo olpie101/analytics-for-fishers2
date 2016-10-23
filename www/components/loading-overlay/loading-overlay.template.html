@@ -1,0 +1,21 @@
+<style>
+    #loading-overlay{
+        position: absolute;;
+        left:0;
+        top:0;
+        width: 100vw;
+        height:100vh;
+        z-index:1000;
+        padding-top: 40vh;
+        background-color:rgba(100, 100, 100,0.5);
+        text-align: center;
+    }
+
+    .spinner-custom svg {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+<div id="loading-overlay" ng-if="$ctrl.loading">
+    <ion-spinner icon="spiral", class="spinner-energized spinner-custom"></ion-spinner>
+</div>

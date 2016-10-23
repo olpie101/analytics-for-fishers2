@@ -1,74 +1,102 @@
 (function(){
     'use strict';
-    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, $window){
+    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, ResultsUtil){
         const ctrl = this;
         var responseData;
-        var selectedMonth;
-        var selectedCalculationMethod;
-        var selectedCalculationMethodIndex = 0;
-        var calculationSelectionKeys = ["weight_total", "numbers_total"];
-        var renderGraph = true;
-        ctrl.selected = ["2015", "8"];
-        ctrl.months = [];
+        ctrl.selectedCalculationMethod = "Items";
+        ctrl.selectedInterval = "Monthly";
+        ctrl.intervals = ["Yearly", "Monthly", "Weekly"];
+        ctrl.methods = ["Items", "Weight", "Crates"];
+        ctrl.loading = false;
 
         ctrl.$onInit = function() {
-            console.log("#### catch by time period init");
-            // ctrl.months = ["hello", "goodbye"];
-            sfdata.queryCatchByTimePeriod()
-                    .then(handlerResponse);
+            requestData();
+        }
+
+        function requestData(){
+            ctrl.loading = true;
+            sfdata.queryCatchByTimePeriod(ctrl.selectedInterval)
+                    .then(handlerResponse, showError);
         }
 
         const handlerResponse = function(result){
             responseData = result.records;
-            ctrl.months = responseData.map(record => record.year+" "+record.month);
-
-            if(ctrl.months.length > 0){
-                ctrl.selected = ctrl.months[0];
-                ctrl.monthChange(ctrl.months[0]);
-            }
             updateData();
+            ctrl.loading = false;
         }
 
-        //month selection has been changed
-        ctrl.monthChange = function(selection) {
-            selectedMonth = selection.split(" ");
+        ctrl.intervalChange = function(selection) {
+            requestData();
+        }
+
+        ctrl.calculationMethodChange = function(selection){
             updateData();
         }
 
         function updateData(){
-            if(renderGraph == false){
-                return;
-            }
-
             Rx.Observable.from(responseData)
-                // .filter(info => info.month == selectedMonth)
-                // .filter(info => info.landing_site__c == selectedLocation.toLowerCase().replace(' ', '_'))
-                .groupBy(info => info.year+" "+info.month)
+                .groupBy(record => groupByInterval(ctrl.selectedInterval, record))
                 .flatMap(aggregateSpecies)
                 .toArray()
+                .map(data => data.sort((a, b) => ResultsUtil.sortByInterval(ctrl.selectedInterval, a, b)))
+                .map(data => data.slice(0, 12))
                 // .map(data => ResultsUtil.applyMapThreshold(data, 0.001))
-                // .map(list => list.sort((a, b) => SpeciesUtil.speciesComparator(a, b, "key")))
                 .subscribe(data => {
-                    console.log("subscribed");
-                    console.log(data);
                     ctrl.dataMap = data;
-                    ctrl.xTitle = "Species";
-                    ctrl.yTitle = "Quantity";
+                    ctrl.xTitle = getXTitle(ctrl.selectedInterval);
+                    ctrl.yTitle = getYTitle(ctrl.selectedCalculationMethod);
                 });
         }
 
-        function aggregateSpecies(speciesObs) {
+        function groupByInterval(method, record) {
+            switch (method.toLowerCase()) {
+                case "yearly":
+                    return record.year;
+                case "monthly":
+                    return record.year+"-"+record.month;
+                case "weekly":
+                    return record.year+"-w"+record.week;
+                default: break;
+
+            }
+        }
+
+        function getYTitle(method) {
+            switch(method.toLowerCase()){
+                case 'items':
+                    return "Quantity";
+                case 'weight':
+                    return "Weight (kg)";
+                case 'crates':
+                    return "Quantity (crates)";
+                default: break;
+            }
+        }
+
+        function getXTitle(method) {
+            switch(method.toLowerCase()){
+                case 'yearly':
+                    return "Year";
+                case 'monthly':
+                    return "Month";
+                case 'weekly':
+                    return "Week";
+                default: break;
+            }
+        }
+
+        function aggregateSpecies(monthObs) {
             var records = new Map();
 
-            return speciesObs
+            return monthObs
                 .reduce(collectTotal, records)
                 .map(summedRecords => {
-                    return createRecord(speciesObs.key, summedRecords);
+                    return createRecord(monthObs.key, summedRecords);
                 });
         }
 
         function collectTotal(acc, entry){
-            acc.set(entry.species, entry.items);
+            acc.set(entry.species, entry[ctrl.selectedCalculationMethod.toLowerCase()]);
             return acc;
         }
 
@@ -79,8 +107,7 @@
         }
 
         var showError = function(err) {
-            console.log("error occured");
-            console.log(err);
+            ctrl.loading = false;
         }
     }
 

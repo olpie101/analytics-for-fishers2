@@ -2,6 +2,29 @@
     'use strict';
     angular.module('utilsModule')
     .service('ResultsUtil', function() {
+        function getYear(value){
+            value = value.toString();
+            return parseInt(value.split("-")[0]);
+        }
+
+        function getMonth(value){
+            return parseInt(value.split("-")[1]);
+        }
+
+        function getWeek(value){
+            return parseInt(value.split("-w")[1]);
+        }
+
+        function compareNumbers(value1, value2){
+            if (value1 > value2){
+                return 1;
+            }else if (value1 < value2) {
+                return -1;
+            }else{
+                return 0;
+            }
+        }
+
         return {
             // Applies a threshold on each entry by filtering any entry with a
             // total less than the percentage threshold provided when compared to
@@ -25,6 +48,38 @@
                     return record;
                 });
             },
+
+            // comparator to sort by year, month or week
+            sortByInterval: function (method, value1, value2) {
+                switch (method.toLowerCase()) {
+                    case 'yearly':
+                        return compareNumbers(getYear(value1.key), getYear(value2.key));
+                    case 'monthly':
+                        var month1 = getMonth(value1.key);
+                        var month2 = getMonth(value2.key);
+                        var year1 = getYear(value1.key);
+                        var year2 = getYear(value2.key);
+
+                        if (year1 != year2){
+                            return compareNumbers(year1, year2);
+                        } else {
+                            return compareNumbers(month1, month2);
+                        }
+                    case 'weekly':
+                        var week1 = getWeek(value1.key);
+                        var week2 = getWeek(value2.key);
+                        var year1 = getYear(value1.key);
+                        var year2 = getYear(value2.key);
+
+                        if (year1 != year2){
+                            return compareNumbers(year1, year2);
+                        } else {
+                            return compareNumbers(week1, week2);
+                        }
+                    default: return 0;
+
+                }
+            }
         }
     });
 })();
