@@ -519,6 +519,12 @@ angular.module('forceng', [])
 
     }
 
+    function logout() {
+        console.log("logging out in forceng");
+        oauthPlugin.logout();
+        // force.login();
+    }
+
     // The public API
     return {
       init: init,
@@ -535,7 +541,8 @@ angular.module('forceng', [])
       apexrest: apexrest,
       chatter: chatter,
       discardToken: discardToken,
-      oauthCallback: oauthCallback
+      oauthCallback: oauthCallback,
+      logout: logout
     };
 
   });

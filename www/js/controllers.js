@@ -3,6 +3,7 @@ angular.module('starter.controllers', ['forceng'])
     .controller('AppCtrl', function ($scope, force) {
 
         $scope.logout = function() {
+            console.log("logging out");
             force.logout();
         };
 
