@@ -66,6 +66,9 @@ gulp.task('babel', function() {
     gulp.src('www/components/**/*.html')
         .pipe(gulp.dest(componentsDist));
 
+    gulp.src('www/components/**/*.css')
+        .pipe(gulp.dest(componentsDist));
+
     gulp.src('www/js/**/*.js')
         .pipe(babel({
             presets: ['es2015']
