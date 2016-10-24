@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Adds removes duplicate entry from AndroidManifest.
+// Changes the app icon from SalesForce icon to Abalobi icon
+
 var sh = require('shelljs');
 var fs   = require('fs');
 var path = require('path');
@@ -15,7 +18,7 @@ if (rootdir) {
         try {
             var platform = platforms[x].trim().toLowerCase();
             var manifestPath;
-            
+
             if(platform == 'android') {
                 manifestPath = path.join('platforms', platform, 'AndroidManifest.xml');
             }
@@ -23,9 +26,10 @@ if (rootdir) {
             const toReplace = '<activity android:exported="true" android:name="com.adobe.phonegap.push.PushHandlerActivity" />'
             var data = fs.readFileSync(manifestPath, 'utf-8');
             data = data.replace(toReplace, '');
+            data = data.replace('@drawable/sf__icon', '@drawable/icon');
             fs.writeFileSync(manifestPath, data);
             console.log('Removed duplicate entry in AndroidManifest.xml.');
-
+            console.log('Replaced SF app icon');
         } catch(e) {
             process.stdout.write(e.toString());
         }
