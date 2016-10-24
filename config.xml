@@ -1,11 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.ionicframework.analyticsforfishers2865931" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>analytics-for-fishers2</name>
+<widget id="com.abalobi.fisheranalytics" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Analytics for Fishers</name>
     <description>
-        An Ionic Framework and Cordova project.
+        Abalobi analytics app for fishers.
+        Provides a break down of various metrics for users regiters on Abalobi fisher.
     </description>
-    <author email="you@example.com" href="http://example.com.com/">
-      Your Name Here
+    <author email="support@abalobi.info" href="http://abalobi.info/">
+      Abalobi
     </author>
     <content src="index.html" />
     <access origin="*" />
