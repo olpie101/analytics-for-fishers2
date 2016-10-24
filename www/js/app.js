@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
-                'utilsModule', 'loadingOverlayModule', 'demoQueryModule'])
+                'utilsModule', 'loadingOverlayModule', 'recentTripsModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
@@ -44,13 +44,13 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
       if (forcengOptions.accessToken) {
         // If the accessToken was provided (typically when running the app from within a Visualforce page,
         // go straight to the contact list
-        $state.go('app.demoquery');
+        $state.go('app.recents');
       } else {
         // Otherwise (the app is probably running as a standalone web app or as a hybrid local app with the
         // Mobile SDK, login first.)
         force.login().then(
           function () {
-            $state.go('app.demoquery');
+            $state.go('app.recents');
           },
           function(error) {
             alert("Login was not successful");
@@ -86,11 +86,11 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
           }
         }
       })
-      .state('app.demoquery', {
-        url: "/demoquery",
+      .state('app.recents', {
+        url: "/recents",
         views: {
           'menuContent': {
-            templateUrl: baseURL + "templates/demo-query.html"
+            templateUrl: baseURL + "templates/recent-trips.html"
           }
         }
       })

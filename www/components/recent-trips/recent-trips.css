@@ -1,0 +1,37 @@
+.recentTripsTitle {
+    margin: 20px;
+    font-weight: 900;
+}
+
+.infoEntryHeader {
+    font-weight: 700;
+    font-size: 12pt;
+    background-color: #e2e2e2;
+}
+
+.infoEntry {
+    font-size: 12pt;
+    padding-bottom: 4px;
+    min-height: 20px;
+}
+
+.infoEntry:last-child{
+    padding-bottom: 16px;
+}
+
+.infoEntry li:last-child{
+    margin-bottom: 16px;
+}
+
+.infoEntry .infoEntryKey {
+    float: left;
+    font-weight: bold;
+}
+
+.infoEntry .infoEntryValue {
+    float: right;
+}
+
+.noBold {
+    font-weight: normal;
+}

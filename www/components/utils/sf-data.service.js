@@ -24,7 +24,9 @@
                 }
 
                 query += ', lkup_species__r.name_eng__c species, '+
-                        'SUM(num_items__c) items '+
+                        'SUM(num_items__c) items, '+
+                        'SUM(weight_kg__c) weight, '+
+                        'SUM(num_crates__c) crates '+
                         'FROM Ablb_Fisher_Catch__c ';
 
                 switch (interval) {
@@ -50,8 +52,35 @@
                 return force.query(query);
             }
 
+            const lastNTripDates = function (nummberOfDays) {
+                var query = 'SELECT id FROM Ablb_Fisher_Trip__c ORDER BY trip_date__c DESC LIMIT '+nummberOfDays;
+                return force.query(query);
+            }
+
+            const lastNTripCatches = function(nummberOfDays){
+                return lastNTripDates(nummberOfDays)
+                    .then(handleDateResponses);
+
+                 function handleDateResponses(result){
+                     var queryList = result.records.map(record => "'"+record.Id+"'").join(',');
+                     console.log(queryList);
+                     var query = "SELECT parent_trip__r.trip_date__c date, "+
+                     "parent_trip__r.lkup_landing_site__r.name_eng__c site, "+ //site doesn't alias but is needed to remove abiguity
+                     "lkup_species__r.name_eng__c species, SUM(num_items__c) items, "+
+                     "SUM(weight_kg__c) weight, SUM(num_crates__c) crates "+
+                     "FROM Ablb_Fisher_Catch__c "+
+                     "WHERE parent_trip__c IN ("+queryList+") "+
+                     "GROUP BY parent_trip__r.trip_date__c, "+
+                     "parent_trip__r.lkup_landing_site__r.name_eng__c, lkup_species__r.name_eng__c "+
+                     "ORDER BY parent_trip__r.trip_date__c DESC NULLS LAST";
+
+                     return force.query(query);
+                 }
+            }
+
             return {
-                queryCatchByTimePeriod: queryCatchByTimePeriod
+                queryCatchByTimePeriod: queryCatchByTimePeriod,
+                lastNTripCatches: lastNTripCatches
             };
         });
 })();

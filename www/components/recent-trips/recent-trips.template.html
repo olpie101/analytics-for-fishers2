@@ -1,0 +1,16 @@
+<link href="components/recent-trips/recent-trips.css" rel="stylesheet">
+<h4 class="recentTripsTitle">Your recent trips</h4>
+
+<div class="card" ng-repeat="record in $ctrl.trips">
+    <div class="item infoEntryHeader">
+        Date: <span class="noBold">{{record.key}}</span><br/>Landing site: <span class="noBold">{{record.site}}</span>
+    </div>
+    <div class="item item-text-wrap">
+        <ul class="list">
+            <li class="infoEntry" ng-repeat="entry in record.speciesInfo">
+                <span class="infoEntryKey">{{entry.key}}</span><span class="infoEntryValue">{{entry.value}}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+<loading-overlay loading="$ctrl.loading"></loading-overlay>
