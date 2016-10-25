@@ -72,3 +72,18 @@ You'll need to delete the following line from the manifest
 in order to be able to build in Android Studio. It should be a single line.
 
 Then switch to android studio, and build / run.
+
+-----
+# Common Issues
+### The app crashes on startup
+If the app is crashing on startup:
+- Check if there is an older version of the app on the phone, possibly under a different package name.
+- Uninstall all versions of the app, then re-install the latest version from the Play Store.
+
+This is due to the credentials of the old Salesforce Analytics app and those of the new app being stored in the same location on internal storage.
+
+### Not visible in the play store
+- The salesforce app SDK only supports devices running **Android 4.4.x and up.** If your device does not meet this requirement, you will not see the app in the play store.
+
+- Another possibility is that the device you are using does not meet the **permission requirements**. This could mean your device could be  incapable of receiving SMS's, for example, in which case the app will also not be visible from the store if browsing from your device.
+> In this case, you will still be able to side-load the app manually using the raw apk, but you might find errors when using unsupported features.
