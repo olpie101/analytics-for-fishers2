@@ -1,12 +1,25 @@
 angular.module('starter.controllers', ['forceng'])
 
-    .controller('AppCtrl', function ($scope, force) {
-
+    .controller('AppCtrl', function ($scope, force, refreshBus) {
+        $scope.refreshing = false;
         $scope.logout = function() {
             console.log("logging out");
             force.logout();
         };
 
+        $scope.refresh = function() {
+            console.log("refreshing");
+            refreshBus.post(true);
+            $scope.refreshing = true;
+        }
+
+        refreshBus.observable()
+            .filter(evt => !evt)
+            .subscribe(evt => $scope.refreshing = false);
+
+        refreshBus.observable()
+            .filter(evt => evt == null)
+            .subscribe(evt => $scope.refresh());
     })
 
     .controller('ContactListCtrl', function ($scope, force) {

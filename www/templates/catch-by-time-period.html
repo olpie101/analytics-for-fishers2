@@ -1,5 +1,8 @@
 <ion-view view-title="Total Catch by Time Period">
-  <ion-content>
-    <catch-by-time-period></catch-by-time-period>
-  </ion-content>
+    <ion-nav-buttons side="primary">
+        <refresh-nav-button refreshing="refreshing" refresher='refresh'></refresh-nav-button>
+    </ion-nav-buttons>
+    <ion-content>
+        <catch-by-time-period></catch-by-time-period>
+    </ion-content>
 </ion-view>

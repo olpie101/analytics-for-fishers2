@@ -1,5 +1,9 @@
-<ion-view view-title="Recent Trips">
-  <ion-content>
-    <recent-trips></recent-trips>
-  </ion-content>
+
+<ion-view title="Recent Trips">
+    <ion-nav-buttons side="primary">
+        <refresh-nav-button refreshing="refreshing" refresher='refresh'></refresh-nav-button>
+    </ion-nav-buttons>
+    <ion-content>
+        <recent-trips></recent-trips>
+    </ion-content>
 </ion-view>

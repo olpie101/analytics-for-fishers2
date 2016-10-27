@@ -1,14 +1,21 @@
 (function() {
     'use strict';
-    var recentTripsController = function RecentTripsController(force, sfdata){
+    var recentTripsController = function RecentTripsController(force, sfdata, refreshBus){
         var ctrl = this;
         ctrl.loading = false;
         var responseData;
         const NUMBER_OF_RECENT_TRIPS = 10;
 
         ctrl.$onInit = function() {
+            refreshBus.observable()
+                .filter(evt => evt)
+                .subscribe(evt => requestData());
+            refreshBus.post(null);
+        }
+
+        function requestData() {
             ctrl.loading = true;
-            var q = sfdata.lastNTripCatches(NUMBER_OF_RECENT_TRIPS)
+            sfdata.lastNTripCatches(NUMBER_OF_RECENT_TRIPS)
                         .then(handleResponse, showError);
         }
 
@@ -35,7 +42,11 @@
 
         function collectTotal(acc, entry){
             if(typeof acc.site === 'undefined'){
-                acc.site = entry.site.substring(entry.site.indexOf('-')+1);
+                if(typeof entry.site === 'undefined' || entry.site == null){
+                    acc.site = "Unknown";
+                } else {
+                    acc.site = entry.site.substring(entry.site.indexOf('-')+1);
+                }
             }
             acc.speciesInfo.push({key:entry.species, value:getEntryValue(entry)});
             return acc;
@@ -65,6 +76,7 @@
             console.log(result);
             ctrl.loading = false;
             responseData = result.records;
+            refreshBus.post(false);
             updateData();
         }
 
@@ -78,6 +90,6 @@
     angular.module('recentTripsModule')
         .component('recentTrips', {
             templateUrl: 'components/recent-trips/recent-trips.template.html',
-            controller: recentTripsController
+            controller: recentTripsController,
         })
 })();

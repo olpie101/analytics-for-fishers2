@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, ResultsUtil){
+    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, ResultsUtil, refreshBus){
         const ctrl = this;
         var responseData;
         ctrl.selectedCalculationMethod = "Items";
@@ -10,10 +10,14 @@
         ctrl.loading = false;
 
         ctrl.$onInit = function() {
-            requestData();
+            refreshBus.observable()
+                .filter(evt => evt)
+                .subscribe(evt => requestData());
+            refreshBus.post(null);
         }
 
         function requestData(){
+            console.log("req data");
             ctrl.loading = true;
             sfdata.queryCatchByTimePeriod(ctrl.selectedInterval)
                     .then(handlerResponse, showError);
@@ -21,8 +25,9 @@
 
         const handlerResponse = function(result){
             responseData = result.records;
-            updateData();
+            refreshBus.post(false);
             ctrl.loading = false;
+            updateData();
         }
 
         ctrl.intervalChange = function(selection) {

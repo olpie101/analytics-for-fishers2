@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
-                'utilsModule', 'loadingOverlayModule', 'recentTripsModule'])
+                'utilsModule', 'loadingOverlayModule', 'recentTripsModule', 'refreshButtonModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
