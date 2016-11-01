@@ -3,10 +3,10 @@
     const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, ResultsUtil, refreshBus){
         const ctrl = this;
         var responseData;
-        ctrl.selectedCalculationMethod = "Items";
-        ctrl.selectedInterval = "Monthly";
-        ctrl.intervals = ["Yearly", "Monthly", "Weekly"];
-        ctrl.methods = ["Items", "Weight", "Crates"];
+        ctrl.intervals = sfdata.TIME_INTERVALS;
+        ctrl.methods = sfdata.QUANTITY_AGGREGATION_TYPES;
+        ctrl.selectedCalculationMethod = ctrl.methods[0];
+        ctrl.selectedInterval = ctrl.intervals[1];
         ctrl.loading = false;
 
         ctrl.$onInit = function() {
@@ -40,7 +40,7 @@
 
         function updateData(){
             Rx.Observable.from(responseData)
-                .groupBy(record => groupByInterval(ctrl.selectedInterval, record))
+                .groupBy(record => sfdata.groupByInterval(ctrl.selectedInterval, record))
                 .flatMap(aggregateSpecies)
                 .toArray()
                 .map(data => data.sort((a, b) => ResultsUtil.sortByInterval(ctrl.selectedInterval, a, b)))
@@ -51,19 +51,6 @@
                     ctrl.xTitle = getXTitle(ctrl.selectedInterval);
                     ctrl.yTitle = getYTitle(ctrl.selectedCalculationMethod);
                 });
-        }
-
-        function groupByInterval(method, record) {
-            switch (method.toLowerCase()) {
-                case "yearly":
-                    return record.year;
-                case "monthly":
-                    return record.year+"-"+record.month;
-                case "weekly":
-                    return record.year+"-w"+record.week;
-                default: break;
-
-            }
         }
 
         function getYTitle(method) {

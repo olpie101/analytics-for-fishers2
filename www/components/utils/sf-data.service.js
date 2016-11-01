@@ -3,6 +3,9 @@
 
     angular.module('utilsModule')
         .factory('sfdata', function(force){
+            const TIME_INTERVALS = ["Yearly", "Monthly", "Weekly"];
+            const QUANTITY_AGGREGATION_TYPES = ["Items", "Weight", "Crates"];
+
             const queryCatchByTimePeriod = function(interval){
                 interval = interval.toLowerCase();
                 var query = 'SELECT '
@@ -78,9 +81,26 @@
                  }
             }
 
+
+            const groupByInterval = function (method, record) {
+                switch (method.toLowerCase()) {
+                    case "yearly":
+                        return record.year;
+                    case "monthly":
+                        return record.year+"-"+record.month;
+                    case "weekly":
+                        return record.year+"-w"+record.week;
+                    default: break;
+
+                }
+            }
+
             return {
+                TIME_INTERVALS: TIME_INTERVALS,
+                QUANTITY_AGGREGATION_TYPES: QUANTITY_AGGREGATION_TYPES,
                 queryCatchByTimePeriod: queryCatchByTimePeriod,
-                lastNTripCatches: lastNTripCatches
+                lastNTripCatches: lastNTripCatches,
+                groupByInterval: groupByInterval,
             };
         });
 })();
