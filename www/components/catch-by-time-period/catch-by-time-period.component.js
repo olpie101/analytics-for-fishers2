@@ -100,6 +100,7 @@
 
         var showError = function(err) {
             ctrl.loading = false;
+            refreshBus.post(false);
         }
     }
 
