@@ -6,25 +6,65 @@
             const TIME_INTERVALS = ["Yearly", "Monthly", "Weekly"];
             const QUANTITY_AGGREGATION_TYPES = ["Items", "Weight", "Crates"];
 
+            const intervalQuerySelectSection = function (interval, parentPrefix = "") {
+                switch (interval) {
+                    case 'yearly':
+                        return 'CALENDAR_YEAR('+parentPrefix+'trip_date__c) year ';
+                        break;
+                    case 'monthly':
+                        return 'CALENDAR_YEAR('+parentPrefix+'trip_date__c) year, '+
+                        'CALENDAR_MONTH('+parentPrefix+'trip_date__c) month ';
+                        break;
+                    case 'weekly':
+                        return 'CALENDAR_YEAR('+parentPrefix+'trip_date__c) year, '+
+                        'CALENDAR_MONTH('+parentPrefix+'trip_date__c) month, '+
+                        'WEEK_IN_YEAR('+parentPrefix+'trip_date__c) week ';
+                        break;
+                    default: return;
+                }
+            }
+
+            const intervalQueryGroupBySection = function(interval, parentPrefix = "") {
+                switch (interval) {
+                    case 'yearly':
+                        return 'GROUP BY CALENDAR_YEAR('+parentPrefix+'trip_date__c) ';
+                        break;
+                    case 'monthly':
+                        return 'GROUP BY CALENDAR_YEAR('+parentPrefix+'trip_date__c), '+
+                            'CALENDAR_MONTH('+parentPrefix+'trip_date__c) ';
+                        break;
+                    case 'weekly':
+                        return 'GROUP BY CALENDAR_YEAR('+parentPrefix+'trip_date__c), '+
+                            'CALENDAR_MONTH('+parentPrefix+'trip_date__c), '+
+                            'WEEK_IN_YEAR('+parentPrefix+'trip_date__c) ';
+                        break;
+                    default: return "";
+                }
+            }
+
+            const intervalQueryOrderBySection = function(interval, parentPrefix = "") {
+                switch (interval) {
+                    case 'yearly':
+                        return 'ORDER BY CALENDAR_YEAR('+parentPrefix+'trip_date__c) ';
+                        break;
+                    case 'monthly':
+                        return 'ORDER BY CALENDAR_YEAR('+parentPrefix+'trip_date__c), '+
+                            'CALENDAR_MONTH('+parentPrefix+'trip_date__c) ';
+                        break;
+                    case 'weekly':
+                        return 'ORDER BY CALENDAR_YEAR('+parentPrefix+'trip_date__c), '+
+                            'CALENDAR_MONTH('+parentPrefix+'trip_date__c), '+
+                            'WEEK_IN_YEAR('+parentPrefix+'trip_date__c) ';
+                        break;
+                    default: return "";
+                }
+            }
+
             const queryCatchByTimePeriod = function(interval){
                 interval = interval.toLowerCase();
                 var query = 'SELECT '
 
-                switch (interval) {
-                    case 'yearly':
-                        query += 'CALENDAR_YEAR(parent_trip__r.odk_date__c) year ';
-                        break;
-                    case 'monthly':
-                        query += 'CALENDAR_YEAR(parent_trip__r.odk_date__c) year, '+
-                        'CALENDAR_MONTH(parent_trip__r.odk_date__c) month ';
-                        break;
-                    case 'weekly':
-                        query += 'CALENDAR_YEAR(parent_trip__r.odk_date__c) year, '+
-                        'CALENDAR_MONTH(parent_trip__r.odk_date__c) month, '+
-                        'WEEK_IN_YEAR(parent_trip__r.odk_date__c) week ';
-                        break;
-                    default: break;
-                }
+                query += intervalQuerySelectSection(interval, "parent_trip__r.");
 
                 query += ', lkup_species__r.name_eng__c species, '+
                         'SUM(num_items__c) items, '+
@@ -32,21 +72,7 @@
                         'SUM(num_crates__c) crates '+
                         'FROM Ablb_Fisher_Catch__c ';
 
-                switch (interval) {
-                    case 'yearly':
-                        query += 'GROUP BY CALENDAR_YEAR(parent_trip__r.odk_date__c) ';
-                        break;
-                    case 'monthly':
-                        query += 'GROUP BY CALENDAR_YEAR(parent_trip__r.odk_date__c), '+
-                            'CALENDAR_MONTH(parent_trip__r.odk_date__c) ';
-                        break;
-                    case 'weekly':
-                        query += 'GROUP BY CALENDAR_YEAR(parent_trip__r.odk_date__c), '+
-                            'CALENDAR_MONTH(parent_trip__r.odk_date__c), '+
-                            'WEEK_IN_YEAR(parent_trip__r.odk_date__c) ';
-                        break;
-                    default: break;
-                }
+                query += intervalQueryGroupBySection(interval, "parent_trip__r.");
 
                 query += ', lkup_species__r.name_eng__c';
 
@@ -81,6 +107,135 @@
                  }
             }
 
+            const queryTripExpenses = function(interval){
+                interval = interval.toLowerCase();
+                var timeThreshold;
+                switch(interval){
+                    case 'monthly':
+                        timeThreshold = "LAST_YEAR";
+                    case 'weekly':
+                        timeThreshold = 'LAST_N_MONTHS:3';
+                    default:
+                        timeThreshold = "LAST_YEAR";
+                }
+
+                var query = 'SELECT '
+
+                query += intervalQuerySelectSection(interval);
+
+                query += ", SUM(cost_bait__c) cost_bait, SUM(cost_food__c) cost_food, "+
+                        "SUM(cost_fuel__c) cost_fuel, SUM(cost_harbour_fee__c) "+
+                        "cost_harbour_fee, SUM(cost_oil__c) cost_oil, "+
+                        "SUM(cost_other_amount__c) cost_other, "+
+                        "SUM(cost_transport__c) cost_transport, SUM(displayed_profit__c) displayed_profit "+
+                        "FROM Ablb_Fisher_Trip__c "+
+                        "WHERE cost_has__c ='yes' AND trip_date__c > "+timeThreshold+"  ";
+                query += intervalQueryGroupBySection(interval);
+
+                query += intervalQueryOrderBySection(interval)+"DESC";
+                console.log("expenses query \n "+query);
+                return force.query(query).then(result => {
+                    console.log("result from sf");
+                    console.log(result);
+                    return Rx.Observable.from(result.records);
+                });
+            }
+
+            const queryTripIncome = function (interval) {
+                interval = interval.toLowerCase();
+                var timeThreshold;
+                switch(interval){
+                    case 'monthly':
+                        timeThreshold = "LAST_YEAR";
+                    case 'weekly':
+                        timeThreshold = 'LAST_N_MONTHS:3';
+                    default:
+                        timeThreshold = "LAST_YEAR";
+                }
+
+                var query = "SELECT parent_trip__r.trip_date__c , "+
+                        "lkup_species__r.name_eng__c, alloc_sold_crates__c, "+
+                        "alloc_sold_number__c, alloc_sold_weight_kg__c, "+
+                        "num_crates__c, num_items__c, weight_kg__c, "+
+                        "other_price_for_total_batch__c, other_price_per_crate__c, "+
+                        "other_price_per_item__c, other_price_per_kg__c "+
+                        "FROM Ablb_Fisher_Catch__c WHERE "+
+                        "parent_trip__r.trip_date__c > LAST_YEAR "+
+                        // "AND lkup_species__r.name_eng__c != '' "+
+                        "ORDER BY parent_trip__r.trip_date__c DESC"
+                return force.query(query)
+                        .then(result => processIncome(interval, result.records));
+            }
+
+            const processIncome = function (interval, records) {
+                return Rx.Observable.from(records)
+                    .doOnNext(record => record.month = parseInt(record
+                                            .parent_trip__r
+                                            .trip_date__c.split('-')[1]))
+                    .doOnNext(record => record.year = parseInt(record
+                                            .parent_trip__r
+                                            .trip_date__c.split('-')[0]))
+                    .groupBy(record => groupByInterval(interval, record))
+                    .flatMap(calculateMonthlyIncome);
+            }
+
+            const calculateMonthlyIncome = function (monthObs) {
+                console.log("month key => "+monthObs.key);
+                var record = new Object();
+                record['key'] = monthObs.key;
+                record['summaries'] = [];
+                record['total'] = 0.0;
+                return monthObs.groupBy(rec => ((rec.lkup_species__r || "Unknown").name_eng__c || "Unknown")) //Handle missing october entry for david
+                            .flatMap(speciesObs => calculateIndividualSpeciesTotals(speciesObs, monthObs.key))
+                            .reduce(calculateMonth, record);
+            }
+
+            const calculateIndividualSpeciesTotals = function(speciesObs, monthKey) {
+                // console.log("species calc => "+speciesObs.key);
+                var records = new Object();
+                records['key'] = speciesObs.key;
+                records['batch'] = 0;
+                records['crates'] = 0;
+                records['items'] = 0;
+                records['weight'] = 0;
+                records['total'] = 0;
+                return speciesObs.reduce(aggSpecies, records);
+            }
+
+            const calculateMonth = function (acc, entry) {
+                //Only add if entry contains actual information
+                if(entry.batch+entry.crates+entry.items+entry.weight > 0){
+                    acc.summaries.push(entry);
+                }
+                acc.total += entry.total;
+                return acc;
+            }
+
+            const aggSpecies = function (acc, entry) {
+                var batch = (entry.other_price_for_total_batch__c || 0);
+                var crateCount = (entry.alloc_sold_crates__c || 0);
+                var crateValue = crateCount * (entry.other_price_per_crate__c|| 0);
+                var itemCount = (entry.alloc_sold_number__c || 0);
+                var itemValue = itemCount * (entry.other_price_per_item__c);
+                var weightCount = (entry.alloc_sold_weight_kg__c || 0);
+                var weightValue = weightCount * (entry.other_price_per_kg__c);
+
+                if(batch > 0){
+                    acc.batch += 1;
+                }
+                acc.crates += crateCount;
+                acc.items += itemCount;
+                acc.weight += weightCount;
+
+                acc.total += crateValue+itemValue+weightValue+batch;
+                return acc;
+            }
+
+            const queryExpensesIncomeByTimePeriod = function (interval) {
+                console.log("query expenses");
+                interval = interval.toLowerCase();
+                return Promise.all([queryTripExpenses(interval), queryTripIncome(interval)]);
+            }
 
             const groupByInterval = function (method, record) {
                 switch (method.toLowerCase()) {
@@ -99,6 +254,7 @@
                 TIME_INTERVALS: TIME_INTERVALS,
                 QUANTITY_AGGREGATION_TYPES: QUANTITY_AGGREGATION_TYPES,
                 queryCatchByTimePeriod: queryCatchByTimePeriod,
+                queryExpensesIncomeByTimePeriod: queryExpensesIncomeByTimePeriod,
                 lastNTripCatches: lastNTripCatches,
                 groupByInterval: groupByInterval,
             };

@@ -6,7 +6,8 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
-                'utilsModule', 'loadingOverlayModule', 'recentTripsModule', 'refreshButtonModule'])
+                'utilsModule', 'loadingOverlayModule', 'recentTripsModule',
+                'expensesIncomeReportModule','refreshButtonModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
@@ -99,6 +100,14 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         views: {
           'menuContent': {
             templateUrl: baseURL + "templates/catch-by-time-period.html"
+          }
+        }
+      })
+      .state('app.expenseincomereport', {
+        url: "/expenses-income-report",
+        views: {
+          'menuContent': {
+            templateUrl: baseURL + "templates/expenses-income-report.html"
           }
         }
       });

@@ -2,3 +2,15 @@
 .buttonNoBorder {
     border: none;
 }
+
+.expense {
+    background-color: #ffaaaa;
+}
+
+.income {
+    background-color: #b5ffad;
+}
+
+.reportSpeciesTitle {
+    font-size: 18pt;
+}
