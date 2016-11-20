@@ -167,6 +167,38 @@
                         .then(result => processIncome(interval, result.records));
             }
 
+            const queryCatchDays = function (){
+                console.log("query catch days");
+                return queryFishingCatchDays();
+            }
+
+            const queryFishingCatchDays = function() {
+                var interval = "monthly";
+                var query = "SELECT ";
+                query += intervalQuerySelectSection(interval);
+                query += ", COUNT (catch_has__c) fishing_days FROM Ablb_Fisher_Trip__c "+
+                            "WHERE catch_has__c = 'yes' AND trip_date__c > LAST_YEAR ";
+
+                query += intervalQueryGroupBySection(interval);
+                query += intervalQueryOrderBySection(interval)+" DESC";
+                return force.query(query).then(result => Rx.Observable.from(result.records)
+                            .doOnNext(rec => {rec['non_fishing_days'] = daysInMonth(rec.month, rec.year)-rec.fishing_days})
+                            .toArray()
+                        );
+            }
+
+            const queryNoCatchReasons = function() {
+                var interval = "monthly";
+                var query = "SELECT ";
+                query += intervalQuerySelectSection(interval);
+                query += " COUNT (catch_has__c) FROM Ablb_Fisher_Trip__c "+
+                            "WHERE catch_has__c = '' ";
+
+                query += intervalQueryGroupBySection(interval);
+                query += intervalQueryOrderBySection(interval)+" DESC";
+                return force.query(query).then(result => Observable.just(result.records));
+            }
+
             const processIncome = function (interval, records) {
                 return Rx.Observable.from(records)
                     .doOnNext(record => record.month = parseInt(record
@@ -250,6 +282,10 @@
                 }
             }
 
+            const daysInMonth = function (month, year) {
+                return new Date(year, month, 0).getDate();
+            }
+
             return {
                 TIME_INTERVALS: TIME_INTERVALS,
                 QUANTITY_AGGREGATION_TYPES: QUANTITY_AGGREGATION_TYPES,
@@ -257,6 +293,7 @@
                 queryExpensesIncomeByTimePeriod: queryExpensesIncomeByTimePeriod,
                 lastNTripCatches: lastNTripCatches,
                 groupByInterval: groupByInterval,
+                queryCatchDays: queryCatchDays,
             };
         });
 })();

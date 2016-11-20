@@ -7,7 +7,8 @@
 angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
                 'utilsModule', 'loadingOverlayModule', 'recentTripsModule',
-                'expensesIncomeReportModule','refreshButtonModule'])
+                'expensesIncomeReportModule', 'catchDaysModule',
+                'refreshButtonModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions) {
 
@@ -108,6 +109,14 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         views: {
           'menuContent': {
             templateUrl: baseURL + "templates/expenses-income-report.html"
+          }
+        }
+      })
+      .state('app.catchdaysreport', {
+        url: "/catch-days-report",
+        views: {
+          'menuContent': {
+            templateUrl: baseURL + "templates/catch-days-report.html"
           }
         }
       });
