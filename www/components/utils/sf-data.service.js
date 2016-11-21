@@ -5,6 +5,12 @@
         .factory('sfdata', function(force, userservice){
             const TIME_INTERVALS = ["Yearly", "Monthly", "Weekly"];
             const QUANTITY_AGGREGATION_TYPES = ["Items", "Weight", "Crates"];
+            const BASE_FISHER_LIST = [{
+                lkup_main_fisher_id__c:"All",
+                lkup_main_fisher_id__r: {
+                    Name: "All"
+                }
+            }];
             var fisherList = null;
 
             const intervalQuerySelectSection = function (interval, parentPrefix = "") {
@@ -322,6 +328,7 @@
             return {
                 TIME_INTERVALS: TIME_INTERVALS,
                 QUANTITY_AGGREGATION_TYPES: QUANTITY_AGGREGATION_TYPES,
+                BASE_FISHER_LIST: BASE_FISHER_LIST,
                 queryCatchByTimePeriod: queryCatchByTimePeriod,
                 queryExpensesIncomeByTimePeriod: queryExpensesIncomeByTimePeriod,
                 lastNTripCatches: lastNTripCatches,

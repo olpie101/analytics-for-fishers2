@@ -10,13 +10,7 @@
         ctrl.selectedInterval = ctrl.intervals[1];
         ctrl.loading = false;
         ctrl.isManager = false;
-        var baseFisherList = [{
-            lkup_main_fisher_id__c:"All",
-            lkup_main_fisher_id__r: {
-                Name: "All"
-            }
-        }];
-        ctrl.fisherList = baseFisherList;
+        ctrl.fisherList = sfdata.BASE_FISHER_LIST;
         ctrl.selectedFisher = null;
 
         ctrl.$onInit = function() {
@@ -37,7 +31,7 @@
             fList.toArray()
                 .filter(fList => ctrl.selectedFisher == null)
                 .subscribe(fList => {
-                    ctrl.fisherList = baseFisherList.concat(fList);
+                    ctrl.fisherList = sfdata.BASE_FISHER_LIST.concat(fList);
                     ctrl.selectedFisher = ctrl.fisherList[0];
                     ctrl.fisherChange(ctrl.selectedFisher);
                 });
