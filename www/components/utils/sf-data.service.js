@@ -2,9 +2,10 @@
     'use strict';
 
     angular.module('utilsModule')
-        .factory('sfdata', function(force){
+        .factory('sfdata', function(force, userservice){
             const TIME_INTERVALS = ["Yearly", "Monthly", "Weekly"];
             const QUANTITY_AGGREGATION_TYPES = ["Items", "Weight", "Crates"];
+            var fisherList = null;
 
             const intervalQuerySelectSection = function (interval, parentPrefix = "") {
                 switch (interval) {
@@ -60,7 +61,7 @@
                 }
             }
 
-            const queryCatchByTimePeriod = function(interval){
+            const queryCatchByTimePeriod = function(interval, forFisher){
                 interval = interval.toLowerCase();
                 var query = 'SELECT '
 
@@ -72,13 +73,24 @@
                         'SUM(num_crates__c) crates '+
                         'FROM Ablb_Fisher_Catch__c ';
 
+                if(forFisher && forFisher != null && forFisher != "All"){
+                    query += "WHERE parent_trip__r.lkup_main_fisher_id__c = '"+forFisher+"' ";
+                }
+
                 query += intervalQueryGroupBySection(interval, "parent_trip__r.");
 
                 query += ', lkup_species__r.name_eng__c';
 
                 console.log("Interval Query:\n"+query);
 
-                return force.query(query);
+                var queryTrans = force.query(query).then(result => Rx.Observable
+                    .from(result.records)
+                );
+
+                var fisherListQueryTrans = queryFisherListPastYear()
+                    .then(result => result[0]);
+
+                return Promise.all([queryTrans, fisherListQueryTrans]);
             }
 
             const lastNTripDates = function (nummberOfDays) {
@@ -92,7 +104,6 @@
 
                  function handleDateResponses(result){
                      var queryList = result.records.map(record => "'"+record.Id+"'").join(',');
-                     console.log(queryList);
                      var query = "SELECT parent_trip__r.trip_date__c date, "+
                      "parent_trip__r.lkup_landing_site__r.name_eng__c site, "+ //site doesn't alias but is needed to remove abiguity
                      "lkup_species__r.name_eng__c species, SUM(num_items__c) items, "+
@@ -199,6 +210,30 @@
                 return force.query(query).then(result => Observable.just(result.records));
             }
 
+            const queryFisherListPastYear = function () {
+                var query = "SELECT lkup_main_fisher_id__c, "+
+                "lkup_main_fisher_id__r.Name "+
+                "FROM Ablb_Fisher_Trip__c "+
+                "WHERE trip_date__c > LAST_YEAR "+
+                "AND lkup_main_fisher_id__c != ''";
+                if(userservice.userType() == "fisher_manager") {
+                    if(fisherList == null){
+                        return Promise.all([force.query(query).then(result => {
+                            fisherList = result.records;
+                            return distinctFisherList();
+                        })]);
+                    }else{
+                        return Promise.all([distinctFisherList()]);
+                    }
+                }
+
+                function distinctFisherList(){
+                    return Rx.Observable
+                            .from(fisherList)
+                            .distinct(rec => rec.lkup_main_fisher_id__c)
+                }
+            }
+
             const processIncome = function (interval, records) {
                 return Rx.Observable.from(records)
                     .doOnNext(record => record.month = parseInt(record
@@ -212,7 +247,6 @@
             }
 
             const calculateMonthlyIncome = function (monthObs) {
-                console.log("month key => "+monthObs.key);
                 var record = new Object();
                 record['key'] = monthObs.key;
                 record['summaries'] = [];
@@ -294,6 +328,7 @@
                 lastNTripCatches: lastNTripCatches,
                 groupByInterval: groupByInterval,
                 queryCatchDays: queryCatchDays,
+                queryFisherListPastYear: queryFisherListPastYear,
             };
         });
 })();

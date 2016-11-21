@@ -1,33 +1,62 @@
 (function(){
     'use strict';
-    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata, ResultsUtil, refreshBus){
+    const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata,
+        ResultsUtil, refreshBus, userservice, $state){
         const ctrl = this;
-        var responseData;
+        var responseObs;
         ctrl.intervals = sfdata.TIME_INTERVALS;
         ctrl.methods = sfdata.QUANTITY_AGGREGATION_TYPES;
         ctrl.selectedCalculationMethod = ctrl.methods[0];
         ctrl.selectedInterval = ctrl.intervals[1];
         ctrl.loading = false;
+        ctrl.isManager = false;
+        var baseFisherList = [{
+            lkup_main_fisher_id__c:"All",
+            lkup_main_fisher_id__r: {
+                Name: "All"
+            }
+        }];
+        ctrl.fisherList = baseFisherList;
+        ctrl.selectedFisher = null;
 
         ctrl.$onInit = function() {
             refreshBus.observable()
                 .filter(evt => evt)
                 .subscribe(evt => requestData());
             refreshBus.post(null);
+            ctrl.isManager = userservice.userType() == "fisher_manager";
         }
 
         function requestData(){
-            console.log("req data");
-            ctrl.loading = true;
-            sfdata.queryCatchByTimePeriod(ctrl.selectedInterval)
+            sfdata.queryCatchByTimePeriod(ctrl.selectedInterval,
+                ((ctrl.selectedFisher)|| ctrl.fisherList[0]).lkup_main_fisher_id__c)
                     .then(handlerResponse, showError);
         }
 
+        const handleFisherListResponse = function (fList) {
+            fList.toArray()
+                .filter(fList => ctrl.selectedFisher == null)
+                .subscribe(fList => {
+                    ctrl.fisherList = baseFisherList.concat(fList);
+                    ctrl.selectedFisher = ctrl.fisherList[0];
+                    ctrl.fisherChange(ctrl.selectedFisher);
+                });
+        }
+
         const handlerResponse = function(result){
-            responseData = result.records;
+            responseObs = result[0];
+
+            if(ctrl.isManager){
+                handleFisherListResponse(result[1]);
+            }
+
             refreshBus.post(false);
             ctrl.loading = false;
             updateData();
+        }
+
+        ctrl.fisherChange = function (selection) {
+            requestData();
         }
 
         ctrl.intervalChange = function(selection) {
@@ -39,17 +68,17 @@
         }
 
         function updateData(){
-            Rx.Observable.from(responseData)
+            responseObs
                 .groupBy(record => sfdata.groupByInterval(ctrl.selectedInterval, record))
                 .flatMap(aggregateSpecies)
                 .toArray()
                 .map(data => data.sort((a, b) => ResultsUtil.sortByInterval(ctrl.selectedInterval, a, b)))
                 .map(data => data.slice(0, 12))
-                // .map(data => ResultsUtil.applyMapThreshold(data, 0.001))
                 .subscribe(data => {
                     ctrl.dataMap = data;
                     ctrl.xTitle = getXTitle(ctrl.selectedInterval);
                     ctrl.yTitle = getYTitle(ctrl.selectedCalculationMethod);
+                    $state.reload(); //Fixes reloading issues
                 });
         }
 

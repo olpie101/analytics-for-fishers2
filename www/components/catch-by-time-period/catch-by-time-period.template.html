@@ -1,4 +1,14 @@
 <div>
+    <div class="list" ng-if="$ctrl.isManager == true">
+      <label class="item item-input item-select">
+        <div class="input-label">
+          Select Fisher:
+        </div>
+        <select ng-model="$ctrl.selectedFisher" ng-options="fisher.lkup_main_fisher_id__r.Name for fisher in $ctrl.fisherList"
+                ng-change="$ctrl.fisherChange($ctrl.selectedFisher)"></select>
+      </label>
+    </div>
+
     <div class="list">
       <label class="item item-input item-select">
         <div class="input-label">
