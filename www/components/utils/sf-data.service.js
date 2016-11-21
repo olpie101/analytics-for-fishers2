@@ -87,10 +87,7 @@
                     .from(result.records)
                 );
 
-                var fisherListQueryTrans = queryFisherListPastYear()
-                    .then(result => result[0]);
-
-                return Promise.all([queryTrans, fisherListQueryTrans]);
+                return Promise.all([queryTrans, queryFisherListPastYear()]);
             }
 
             const lastNTripDates = function (nummberOfDays) {
@@ -218,13 +215,15 @@
                 "AND lkup_main_fisher_id__c != ''";
                 if(userservice.userType() == "fisher_manager") {
                     if(fisherList == null){
-                        return Promise.all([force.query(query).then(result => {
+                        return Promise.resolve(force.query(query).then(result => {
                             fisherList = result.records;
                             return distinctFisherList();
-                        })]);
+                        }));
                     }else{
-                        return Promise.all([distinctFisherList()]);
+                        return Promise.resolve(distinctFisherList());
                     }
+                }else {
+                    return Promise.resolve([]); //User is not manager return empty list
                 }
 
                 function distinctFisherList(){
