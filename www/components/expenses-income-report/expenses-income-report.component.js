@@ -1,7 +1,8 @@
 (function() {
     "use strict";
 
-    const expensesIncomeReportController = function ExpensesIncomeReportController(sfdata, refreshBus) {
+    const expensesIncomeReportController = function ExpensesIncomeReportController(sfdata,
+         refreshBus, userservice, $state) {
         var ctrl = this;
         ctrl.loading = false;
         ctrl.intervals = sfdata.TIME_INTERVALS.slice(1, 2);
@@ -14,19 +15,35 @@
         var selectedMonthSet = false;
         var expensesResponseDataObs;
         var incomeResponseDataObs;
+        ctrl.isManager = false;
+        ctrl.fisherList = sfdata.BASE_FISHER_LIST;
+        ctrl.selectedFisher = null;
 
         ctrl.$onInit = function(){
             refreshBus.observable()
                 .filter(evt => evt)
                 .subscribe(evt => requestData());
             refreshBus.post(null);
+            ctrl.isManager = userservice.userType() == "fisher_manager";
         }
 
         function requestData(){
-            console.log("requesting data");
             ctrl.loading = true;
-            sfdata.queryExpensesIncomeByTimePeriod(ctrl.selectedInterval)
-                    .then(handlerResponse, showError);
+            sfdata.queryExpensesIncomeByTimePeriod(ctrl.selectedInterval,
+                ((ctrl.selectedFisher)|| ctrl.fisherList[0]).lkup_main_fisher_id__c)
+                .then(handlerResponse, showError);
+        }
+
+        const handleFisherListResponse = function (fList) {
+            if(ctrl.isManager){
+                fList.toArray()
+                .filter(fList => ctrl.selectedFisher == null)
+                .subscribe(fList => {
+                    ctrl.fisherList = sfdata.BASE_FISHER_LIST.concat(fList);
+                    ctrl.selectedFisher = ctrl.fisherList[0];
+                    ctrl.fisherChange(ctrl.selectedFisher);
+                });
+            }
         }
 
         const handlerResponse = function(result){
@@ -34,9 +51,15 @@
             console.log(result);
             expensesResponseDataObs = result[0];
             incomeResponseDataObs = result[1];
+            handleFisherListResponse(result[2]);
             refreshBus.post(false);
             ctrl.loading = false;
             collectMonths(expensesResponseDataObs, incomeResponseDataObs);
+        }
+
+        ctrl.fisherChange = function (selection) {
+            ctrl.selectedFisher = selection;
+            requestData();
         }
 
         ctrl.intervalChange = function(selection) {
@@ -56,48 +79,37 @@
                 .toArray()
                 .map(months => new Set(months).values())
                 .map(monthSetIterable => Array.from(monthSetIterable))
+                .map(months => months.sort())
+                .map(months => months.reverse())
                 .subscribe(months => {
                     ctrl.months = months;
-                    console.log("###months found");
-                    console.log(months);
-                    if(!selectedMonthSet){
-                        ctrl.selectedMonth = ctrl.months[0];
-                        selectedMonthSet = true;
-                        ctrl.monthChange(ctrl.selectedMonth);
-                    }
+                    var index = ctrl.months.indexOf(ctrl.selectedMonth);
+                    if(index < 0) { index = 0; }
+                    ctrl.selectedMonth = ctrl.months[index];
+                    ctrl.monthChange(ctrl.selectedMonth);
                 });
         }
 
         function updateData(){
-            console.log("updating data");
-            expensesResponseDataObs
+            var formattedExpense = expensesResponseDataObs
                     .filter(record => sfdata.groupByInterval(ctrl.selectedInterval, record) == ctrl.selectedMonth)
                     .doOnNext(record => {
                         record['total'] = Object.keys(record)
                                 .filter(prop => prop.startsWith("cost_"))
                                 .reduce((tot, prop) => tot + (record[prop] || 0), 0);
                     })
-                    .defaultIfEmpty({total:"N/A"})
-                    .subscribe(item => {ctrl.expenses = item; console.log("###expenses");console.log(ctrl.expenses);console.log("###expenses end");});
+                    .defaultIfEmpty({total:"N/A"});
 
-            incomeResponseDataObs
-                    .filter(record => record.key == ctrl.selectedMonth)
-                    .subscribe(item => {ctrl.income = item; console.log("###income");console.log(ctrl.income);} )
+            var formattedIncome = incomeResponseDataObs
+                    .filter(record => record.key == ctrl.selectedMonth);
 
-            //TODO zip expenses and income
-
-            // Rx.Observable.from(responseData)
-            //     .groupBy(record => sfdata.groupByInterval(ctrl.selectedInterval, record))
-            //     .flatMap(aggregateSpecies)
-            //     .toArray()
-            //     .map(data => data.sort((a, b) => ResultsUtil.sortByInterval(ctrl.selectedInterval, a, b)))
-            //     .map(data => data.slice(0, 12))
-            //     // .map(data => ResultsUtil.applyMapThreshold(data, 0.001))
-            //     .subscribe(data => {
-            //         ctrl.dataMap = data;
-            //         ctrl.xTitle = getXTitle(ctrl.selectedInterval);
-            //         ctrl.yTitle = getYTitle(ctrl.selectedCalculationMethod);
-            //     });
+            Rx.Observable.concat(formattedExpense, formattedIncome)
+                .toArray()
+                .subscribe(data => {
+                    ctrl.expenses = data[0];
+                    ctrl.income = data[1];
+                    $state.reload();
+                });
         }
 
         const collectExpensesTotals = function(acc, entry){
@@ -117,17 +129,11 @@
                     .filter(prop => prop == "price_batch")
                     .map(prop => entry[prop] || 0);
 
-            console.log("###geting other prices");
             var otherPrices = priceProps
                     .filter(prop => prop != "price_batch")
                     .reduce((tot, prop) =>{
                         var propId = "sold_"+prop.split('_')[1]; //Gets the type (ie. crates, items, weight)
-                        console.log("propId => "+propId);
-                        console.log(entry[propId]);
-                        console.log("prop => "+prop);
-                        console.log(entry[prop]);
                         var value = (entry[prop] || 0)*(entry[propId] || 0);
-                        console.log("value =>"+value);
                         return tot+value
                     }, 0);
             return acc+batchPrice+otherPrices;

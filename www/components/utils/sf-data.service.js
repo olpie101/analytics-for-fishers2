@@ -79,7 +79,8 @@
                         'SUM(num_crates__c) crates '+
                         'FROM Ablb_Fisher_Catch__c ';
 
-                if(forFisher && forFisher != null && forFisher != "All"){
+                if(userservice.userType() == "fisher_manager" &&
+                    forFisher && forFisher != null && forFisher != "All"){
                     query += "WHERE parent_trip__r.lkup_main_fisher_id__c = '"+forFisher+"' ";
                 }
 
@@ -121,7 +122,7 @@
                  }
             }
 
-            const queryTripExpenses = function(interval){
+            const queryTripExpenses = function(interval, forFisher){
                 interval = interval.toLowerCase();
                 var timeThreshold;
                 switch(interval){
@@ -143,19 +144,22 @@
                         "SUM(cost_other_amount__c) cost_other, "+
                         "SUM(cost_transport__c) cost_transport, SUM(displayed_profit__c) displayed_profit "+
                         "FROM Ablb_Fisher_Trip__c "+
-                        "WHERE cost_has__c ='yes' AND trip_date__c > "+timeThreshold+"  ";
-                query += intervalQueryGroupBySection(interval);
+                        "WHERE cost_has__c ='yes' AND trip_date__c > "+timeThreshold+" ";
 
-                query += intervalQueryOrderBySection(interval)+"DESC";
+                if(userservice.userType() == "fisher_manager" &&
+                    forFisher && forFisher != null && forFisher != "All"){
+                    query += "AND lkup_main_fisher_id__c = '"+forFisher+"' ";
+                }
+
+                query += intervalQueryGroupBySection(interval)+
+                        intervalQueryOrderBySection(interval)+"DESC";
                 console.log("expenses query \n "+query);
                 return force.query(query).then(result => {
-                    console.log("result from sf");
-                    console.log(result);
                     return Rx.Observable.from(result.records);
                 });
             }
 
-            const queryTripIncome = function (interval) {
+            const queryTripIncome = function (interval, forFisher) {
                 interval = interval.toLowerCase();
                 var timeThreshold;
                 switch(interval){
@@ -173,16 +177,19 @@
                         "num_crates__c, num_items__c, weight_kg__c, "+
                         "other_price_for_total_batch__c, other_price_per_crate__c, "+
                         "other_price_per_item__c, other_price_per_kg__c "+
-                        "FROM Ablb_Fisher_Catch__c WHERE "+
-                        "parent_trip__r.trip_date__c > LAST_YEAR "+
-                        // "AND lkup_species__r.name_eng__c != '' "+
-                        "ORDER BY parent_trip__r.trip_date__c DESC"
+                        "FROM Ablb_Fisher_Catch__c WHERE parent_trip__r.trip_date__c > LAST_YEAR ";
+
+                if(userservice.userType() == "fisher_manager" &&
+                    forFisher && forFisher != null && forFisher != "All"){
+                    query += "AND parent_trip__r.lkup_main_fisher_id__c = '"+forFisher+"' ";
+                }
+
+                query += "ORDER BY parent_trip__r.trip_date__c DESC"
                 return force.query(query)
                         .then(result => processIncome(interval, result.records));
             }
 
             const queryCatchDays = function (){
-                console.log("query catch days");
                 return queryFishingCatchDays();
             }
 
@@ -302,10 +309,11 @@
                 return acc;
             }
 
-            const queryExpensesIncomeByTimePeriod = function (interval) {
-                console.log("query expenses");
+            const queryExpensesIncomeByTimePeriod = function (interval, forFisher) {
                 interval = interval.toLowerCase();
-                return Promise.all([queryTripExpenses(interval), queryTripIncome(interval)]);
+                return Promise.all([queryTripExpenses(interval, forFisher),
+                    queryTripIncome(interval, forFisher),
+                    queryFisherListPastYear()]);
             }
 
             const groupByInterval = function (method, record) {
