@@ -10,7 +10,7 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
                 'expensesIncomeReportModule', 'catchDaysModule',
                 'refreshButtonModule'])
 
-  .run(function ($ionicPlatform, $state, force, forcengOptions) {
+  .run(function ($ionicPlatform, $state, force, forcengOptions, userservice) {
 
     $ionicPlatform.ready(function () {
 
@@ -52,7 +52,9 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         // Mobile SDK, login first.)
         force.login().then(
           function () {
-            $state.go('app.recents');
+              //init user service
+              userservice.userType();
+              $state.go('app.recents');
           },
           function(error) {
             alert("Login was not successful");
