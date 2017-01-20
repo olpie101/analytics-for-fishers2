@@ -7,8 +7,8 @@
 angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 'barChartModule',
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
                 'utilsModule', 'loadingOverlayModule', 'recentTripsModule',
-                'expensesIncomeReportModule', 'catchDaysModule',
-                'refreshButtonModule'])
+                'expensesIncomeReportModule', 'catchDaysModule', 'evolutionOfPricesModule',
+                'lineChartModule', 'refreshButtonModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions, userservice) {
 
@@ -129,6 +129,14 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         views: {
           'menuContent': {
             templateUrl: baseURL + "templates/catch-days-report.html"
+          }
+        }
+      })
+      .state('app.evolutionofprices', {
+        url: "/evolution-of-prices",
+        views: {
+          'menuContent': {
+            templateUrl: baseURL + "templates/evolution-of-prices.html"
           }
         }
       });

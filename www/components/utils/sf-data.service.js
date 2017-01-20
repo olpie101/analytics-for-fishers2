@@ -246,6 +246,39 @@
                 }
             }
 
+            const queryEvolutionOfPrices = function (method, personalOrCooop) {
+                var lastYear = new Date();
+                lastYear.setMonth(lastYear.getMonth() - 12);
+                lastYear.setDate(0);
+                var interval = "monthly";
+                var query = "SELECT ";
+                var query = "SELECT ";
+                query += intervalQuerySelectSection(interval, "parent_trip__r.");
+                query += ", lkup_species__r.Name, "+
+                    "AVG(other_price_for_total_batch__c) price_batch, "+
+                    "AVG(other_price_per_crate__c) price_crate, "+
+                    "AVG(other_price_per_item__c) price_item, "+
+                    "AVG(other_price_per_kg__c) price_kg, "+
+                    "other_price_type__c, species_other__c, "+
+                    "AVG(coop_price_for_total_batch__c) coop_price_batch, "+
+                    "AVG(coop_price_per_crate__c) coop_price_crate, "+
+                    "AVG(coop_price_per_item__c) coop_price_item, "+
+                    "AVG(coop_price_per_kg__c) coop_price_kg "+
+                    "from Ablb_Fisher_Catch__c "+
+                    "WHERE parent_trip__r.trip_date__c >= "+
+                    lastYear.toISOString().substring(0,10)+" ";
+
+                query += intervalQueryGroupBySection(interval, "parent_trip__r.");
+                query += ", lkup_species__r.Name, species_other__c, "+
+                    "other_price_type__c, coop_price_type__c";
+
+                console.log("query -> "+query);
+
+                return force.query(query).then(result =>
+                     Rx.Observable.from(result.records)
+                 );
+            }
+
             const processIncome = function (interval, records) {
                 return Rx.Observable.from(records)
                     .doOnNext(record => record.month = parseInt(record
@@ -343,6 +376,7 @@
                 groupByInterval: groupByInterval,
                 queryCatchDays: queryCatchDays,
                 queryFisherListPastYear: queryFisherListPastYear,
+                queryEvolutionOfPrices: queryEvolutionOfPrices,
             };
         });
 })();

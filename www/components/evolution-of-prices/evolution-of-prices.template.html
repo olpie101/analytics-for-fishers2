@@ -1,0 +1,25 @@
+<div>
+    <div class="list">
+      <label class="item item-input item-select">
+        <div class="input-label">
+          Show history of:
+        </div>
+        <select ng-model="$ctrl.selectedCalculationMethod" ng-options="method for method in $ctrl.methods"
+                ng-change="$ctrl.calculationMethodChange($ctrl.selectedCalculationMethod)"></select>
+      </label>
+    </div>
+
+
+    <double-sided-toggle left-option="Personal" right-option="Co-op"
+        label="Calculate By:"
+        on-change="$ctrl.calculationToggleChange(value)">
+    </double-sided-toggle>
+
+    <br/>
+
+    <div>
+        <line-chart data="$ctrl.data" xtitle="$ctrl.xTitle" ytitle="$ctrl.yTitle"
+                            width=600 height=450></line-chart>
+    </div>
+    <loading-overlay loading="$ctrl.loading"></loading-overlay>
+</div>
