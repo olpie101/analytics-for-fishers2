@@ -1,6 +1,5 @@
 (function() {
     "use strict";
-    console.log("registering catch days component");
 
     var catchDaysController = function CatchDaysController(sfdata, refreshBus){
         var ctrl = this;

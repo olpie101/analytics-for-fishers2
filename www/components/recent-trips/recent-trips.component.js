@@ -72,8 +72,6 @@
         }
 
         var handleResponse = function(result){
-            console.log("result");
-            console.log(result);
             ctrl.loading = false;
             responseData = result.records;
             refreshBus.post(false);
