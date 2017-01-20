@@ -19,31 +19,41 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
       if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
         window.cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
         window.cordova.plugins.Keyboard.disableScroll(true);
-      }
+
+        // Initialize forceng
+        var oauthPlugin = cordova.require("com.salesforce.plugin.oauth");
+        oauthPlugin.getAuthCredentials(function(creds) {
+            console.log("auth plugin got details");
+            console.log(creds);
+           force.init({
+               appId: creds.clientId,
+               apiVersion: 'v36.0',
+               instanceURL: creds.instanceUrl,
+               accessToken: creds.accessToken,
+               refreshToken: creds.refreshToken
+           });
+
+          //  var forceClient = new forcetk.Client(creds.clientId, creds.loginUrl);
+          //  forceClient.setSessionToken(creds.accessToken, "v36.0", creds.instanceUrl);
+          //  forceClient.setRefreshToken(creds.refreshToken);
+        });
+    }else {
+        // working in browser
+
+        force.init({
+            appId: "", //add this personally
+            apiVersion: 'v36.0',
+            instanceURL: "https://eu5.salesforce.com/",
+            oauthCallbackURL: 'abalobianalyticsforfishers://auth/success',
+            proxyURL: "http://localhost:8200" //default port
+        });
+    }
       if (window.StatusBar) {
         // org.apache.cordova.statusbar required
         StatusBar.styleDefault();
       }
 
-      // Initialize forceng
-      var oauthPlugin = cordova.require("com.salesforce.plugin.oauth");
-      oauthPlugin.getAuthCredentials(function(creds) {
-          console.log("auth plugin got details");
-          console.log(creds);
-         force.init({
-             appId: creds.clientId,
-             apiVersion: 'v36.0',
-             instanceUrl: creds.instanceUrl,
-             accessToken: creds.accessToken,
-             refreshToken: creds.refreshToken
-         });
-
-        //  var forceClient = new forcetk.Client(creds.clientId, creds.loginUrl);
-        //  forceClient.setSessionToken(creds.accessToken, "v36.0", creds.instanceUrl);
-        //  forceClient.setRefreshToken(creds.refreshToken);
-      });
-
-      if (forcengOptions.accessToken) {
+      if (force.isAuthenticated()) {
         // If the accessToken was provided (typically when running the app from within a Visualforce page,
         // go straight to the contact list
         $state.go('app.recents');
