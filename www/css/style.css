@@ -14,3 +14,53 @@
 .reportSpeciesTitle {
     font-size: 18pt;
 }
+
+.float-right{
+    float: right;
+}
+
+.double-sided-toggle{
+    width: 50vh;
+    display: inline-flex;
+    font-size: large;
+}
+
+.double-sided-toggle span{
+    margin: 1px;
+}
+
+.no-border{
+    border: none;
+}
+
+.toggle-label{
+    font-size: medium;
+    font-weight: bold;
+}
+
+.toggle-dims {
+    height: 40px;
+    width: 70px;
+    padding: 0px;
+}
+
+.toggle-dims .track{
+    border-color: #11c1f3;
+    background-color: #11c1f3;
+    height: 20px;
+}
+
+.toggle-dims .handle{
+    height: 24px;
+    top: 2px;
+}
+
+.toggle-small.item-toggle .toggle{
+    top: 4px;
+}
+
+.item-toggle .toggle {
+    right: 0px;
+    left: 10px;
+    top:10px
+}
