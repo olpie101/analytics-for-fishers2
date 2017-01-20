@@ -127,11 +127,11 @@
                 var timeThreshold;
                 switch(interval){
                     case 'monthly':
-                        timeThreshold = "LAST_YEAR";
+                        timeThreshold = dateYearAgo();
                     case 'weekly':
-                        timeThreshold = 'LAST_N_MONTHS:3';
+                        timeThreshold = dateNMonthsAgo(3);
                     default:
-                        timeThreshold = "LAST_YEAR";
+                        timeThreshold = dateYearAgo();
                 }
 
                 var query = 'SELECT '
@@ -144,7 +144,8 @@
                         "SUM(cost_other_amount__c) cost_other, "+
                         "SUM(cost_transport__c) cost_transport, SUM(displayed_profit__c) displayed_profit "+
                         "FROM Ablb_Fisher_Trip__c "+
-                        "WHERE cost_has__c ='yes' AND trip_date__c > "+timeThreshold+" ";
+                        "WHERE cost_has__c ='yes' AND trip_date__c > "+
+                        timeThreshold.toISOString().substring(0,10)+" ";
 
                 if(userservice.userType() == "fisher_manager" &&
                     forFisher && forFisher != null && forFisher != "All"){
@@ -164,11 +165,11 @@
                 var timeThreshold;
                 switch(interval){
                     case 'monthly':
-                        timeThreshold = "LAST_YEAR";
+                        timeThreshold = dateYearAgo();
                     case 'weekly':
-                        timeThreshold = 'LAST_N_MONTHS:3';
+                        timeThreshold = dateNMonthsAgo(3);
                     default:
-                        timeThreshold = "LAST_YEAR";
+                        timeThreshold = dateYearAgo();
                 }
 
                 var query = "SELECT parent_trip__r.trip_date__c , "+
@@ -177,7 +178,8 @@
                         "num_crates__c, num_items__c, weight_kg__c, "+
                         "other_price_for_total_batch__c, other_price_per_crate__c, "+
                         "other_price_per_item__c, other_price_per_kg__c "+
-                        "FROM Ablb_Fisher_Catch__c WHERE parent_trip__r.trip_date__c > LAST_YEAR ";
+                        "FROM Ablb_Fisher_Catch__c WHERE parent_trip__r.trip_date__c > "+
+                        timeThreshold.toISOString().substring(0,10)+" ";
 
                 if(userservice.userType() == "fisher_manager" &&
                     forFisher && forFisher != null && forFisher != "All"){
@@ -196,9 +198,11 @@
             const queryFishingCatchDays = function() {
                 var interval = "monthly";
                 var query = "SELECT ";
+                var lastYear = dateYearAgo();
                 query += intervalQuerySelectSection(interval);
                 query += ", COUNT (catch_has__c) fishing_days FROM Ablb_Fisher_Trip__c "+
-                            "WHERE catch_has__c = 'yes' AND trip_date__c > LAST_YEAR ";
+                            "WHERE catch_has__c = 'yes' AND trip_date__c > "+
+                            lastYear.toISOString().substring(0,10)+" ";
 
                 query += intervalQueryGroupBySection(interval);
                 query += intervalQueryOrderBySection(interval)+" DESC";
@@ -221,10 +225,12 @@
             }
 
             const queryFisherListPastYear = function () {
+                var lastYear = dateYearAgo();
                 var query = "SELECT lkup_main_fisher_id__c, "+
                 "lkup_main_fisher_id__r.Name "+
                 "FROM Ablb_Fisher_Trip__c "+
-                "WHERE trip_date__c > LAST_YEAR "+
+                "WHERE trip_date__c > "+
+                lastYear.toISOString().substring(0,10)+" "+
                 "AND lkup_main_fisher_id__c != ''";
                 if(userservice.userType() == "fisher_manager") {
                     if(fisherList == null){
@@ -247,9 +253,7 @@
             }
 
             const queryEvolutionOfPrices = function (method, personalOrCooop) {
-                var lastYear = new Date();
-                lastYear.setMonth(lastYear.getMonth() - 12);
-                lastYear.setDate(0);
+                var lastYear = dateYearAgo();
                 var interval = "monthly";
                 var query = "SELECT ";
                 var query = "SELECT ";
@@ -364,6 +368,17 @@
 
             const daysInMonth = function (month, year) {
                 return new Date(year, month, 0).getDate();
+            }
+
+            const dateNMonthsAgo = function(n) {
+                var past = new Date();
+                past.setMonth(past.getMonth() - n);
+                past.setDate(0);
+                return past;
+            }
+
+            const dateYearAgo = function() {
+                return dateNMonthsAgo(12);
             }
 
             return {
