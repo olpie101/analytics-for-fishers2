@@ -23,8 +23,6 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         // Initialize forceng
         var oauthPlugin = cordova.require("com.salesforce.plugin.oauth");
         oauthPlugin.getAuthCredentials(function(creds) {
-            console.log("auth plugin got details");
-            console.log(creds);
            force.init({
                appId: creds.clientId,
                apiVersion: 'v36.0',
