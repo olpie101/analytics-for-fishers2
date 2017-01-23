@@ -197,17 +197,20 @@
 
             const queryFishingCatchDays = function() {
                 var interval = "monthly";
-                var query = "SELECT ";
                 var lastYear = dateYearAgo();
-                query += intervalQuerySelectSection(interval);
-                query += ", COUNT (catch_has__c) fishing_days FROM Ablb_Fisher_Trip__c "+
+                var query = "SELECT trip_date__c, COUNT (catch_has__c) "+
+                            "fishing_days FROM Ablb_Fisher_Trip__c "+
                             "WHERE catch_has__c = 'yes' AND trip_date__c > "+
-                            lastYear.toISOString().substring(0,10)+" ";
+                            lastYear.toISOString().substring(0,10)+
+                            "GROUP BY trip_date__c ORDER BY trip_date__c  DESC";
 
-                query += intervalQueryGroupBySection(interval);
-                query += intervalQueryOrderBySection(interval)+" DESC";
+                console.log(query);
                 return force.query(query).then(result => Rx.Observable.from(result.records)
-                            .doOnNext(rec => {rec['non_fishing_days'] = daysInMonth(rec.month, rec.year)-rec.fishing_days})
+                            .groupBy(rec => rec.trip_date__c)
+                            .flatMap( dayObs => dayObs.take(1).map(rec => {rec.fishing_days = 1; return rec}))
+                            .groupBy(rec => truncateDate(rec.trip_date__c))
+                            .flatMap( monthObs => monthObs.count().map( count => {return {date: monthObs.key, fishing_days: count }}))
+                            .doOnNext(rec => {rec['non_fishing_days'] = daysInMonth(rec.date)-rec.fishing_days})
                             .toArray()
                         );
             }
@@ -366,8 +369,17 @@
                 }
             }
 
-            const daysInMonth = function (month, year) {
-                return new Date(year, month, 0).getDate();
+            const truncateDate = function (dateString) {
+                var tempDate = new Date(dateString);
+                tempDate.setDate(1);
+                return tempDate.toISOString().substring(0,10);
+            }
+
+            const daysInMonth = function (dateString) {
+                var tempDate = new Date(dateString);
+                tempDate.setMonth(tempDate.getMonth()+1);
+                tempDate.setDate(0);
+                return tempDate.getDate();
             }
 
             const dateNMonthsAgo = function(n) {

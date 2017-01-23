@@ -1,7 +1,7 @@
 (function(){
     'use strict';
     const catchByTimePeriodController = function CatchByTimePeriodController(force, sfdata,
-        ResultsUtil, refreshBus, userservice, $state){
+        ResultsUtil, refreshBus, userservice){
         const ctrl = this;
         var responseObs;
         ctrl.methods = ["Batch"].concat(sfdata.QUANTITY_AGGREGATION_TYPES);
@@ -78,7 +78,7 @@
                 .map(rec => { return {"date": new Date(rec.year, rec.month, 1), "species": rec.Name, "value":getEvoVal(method, personalOrCooop, rec)}})
                 .groupBy(record => record.species)
                 .flatMap(o => o.toArray())
-                .map( list => list.sort(dateComparator))
+                .map( list => list.sort((a, b) => ResultsUtil.dateComparator(a, b, "date")))
                 .toArray()
                 .subscribe(rec => {
                     ctrl.data = rec;
@@ -148,17 +148,6 @@
         const getEvoVal = function (method, personalOrCooop, record) {
             var filterMethod = convertPriceCalcMethodToVar(method, personalOrCooop);
             return record[filterMethod];
-        }
-
-        const dateComparator = function(a, b) {
-            if(a.date < b.date){
-                return -1;
-            }
-
-            if(a.date > b.date){
-                return 1;
-            }
-            return 0;
         }
     }
 

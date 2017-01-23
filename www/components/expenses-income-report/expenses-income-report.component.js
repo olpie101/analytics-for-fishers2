@@ -2,7 +2,7 @@
     "use strict";
 
     const expensesIncomeReportController = function ExpensesIncomeReportController(sfdata,
-         refreshBus, userservice, $state) {
+         refreshBus, userservice, $state, ResultsUtil) {
         var ctrl = this;
         ctrl.loading = false;
         ctrl.intervals = sfdata.TIME_INTERVALS.slice(1, 2);
@@ -48,7 +48,6 @@
 
         const handlerResponse = function(result){
             console.log("handling e/i response");
-            console.log(result);
             expensesResponseDataObs = result[0];
             incomeResponseDataObs = result[1];
             handleFisherListResponse(result[2]);
@@ -75,12 +74,16 @@
 
             var incMonths = incomeObs.map(record => record.key);
 
-            expMonths.concat(expMonths, incMonths)
+            expMonths.concat(incMonths)
                 .toArray()
                 .map(months => new Set(months).values())
                 .map(monthSetIterable => Array.from(monthSetIterable))
-                .map(months => months.sort())
+                .flatMap( arr => Rx.Observable.from(arr))
+                .map( x => convertToDate(x))
+                .toArray()
+                .map(months => months.sort(ResultsUtil.dateComparator))
                 .map(months => months.reverse())
+                .map(months => months.map(convertToDateString))``
                 .subscribe(months => {
                     ctrl.months = months;
                     var index = ctrl.months.indexOf(ctrl.selectedMonth);
@@ -92,7 +95,7 @@
 
         function updateData(){
             var formattedExpense = expensesResponseDataObs
-                    .filter(record => sfdata.groupByInterval(ctrl.selectedInterval, record) == ctrl.selectedMonth)
+                    .filter(record => sfdata.groupByInterval(ctrl.selectedInterval, record) == ctrl.selectedMonth.replace("-0", "-"))
                     .doOnNext(record => {
                         record['total'] = Object.keys(record)
                                 .filter(prop => prop.startsWith("cost_"))
@@ -101,7 +104,7 @@
                     .defaultIfEmpty({total:"N/A"});
 
             var formattedIncome = incomeResponseDataObs
-                    .filter(record => record.key == ctrl.selectedMonth);
+                    .filter(record => record.key == ctrl.selectedMonth.replace("-0", "-"));
 
             Rx.Observable.concat(formattedExpense, formattedIncome)
                 .toArray()
@@ -137,6 +140,21 @@
                         return tot+value
                     }, 0);
             return acc+batchPrice+otherPrices;
+        }
+
+        const convertToDate = function(dateString) {
+            var yearMonth = dateString.split('-');
+            var tempDate = new Date(yearMonth[0], yearMonth[1]-1, 1);
+            return tempDate;
+        }
+
+        const convertToDateString = function(date) {
+            var year = date.getFullYear();
+            var month = date.getMonth()+1;
+            if(month < 10){
+                month = "0"+month;
+            }
+            return year+"-"+month;
         }
 
         const showError = function(err) {

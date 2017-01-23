@@ -41,7 +41,7 @@
             var interval = "monthly";
             responseObs.flatMap(records => Rx.Observable.from(records))
                 .map(rec => {return {
-                    key: sfdata.groupByInterval(interval, rec),
+                    key: rec.date,
                     fishing: rec.fishing_days,
                     not_fishing: rec.non_fishing_days
                 }})
