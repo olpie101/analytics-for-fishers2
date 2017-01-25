@@ -83,7 +83,7 @@
                 .toArray()
                 .map(months => months.sort(ResultsUtil.dateComparator))
                 .map(months => months.reverse())
-                .map(months => months.map(convertToDateString))``
+                .map(months => months.map(convertToDateString))
                 .subscribe(months => {
                     ctrl.months = months;
                     var index = ctrl.months.indexOf(ctrl.selectedMonth);
