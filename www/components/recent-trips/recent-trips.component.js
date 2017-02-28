@@ -43,6 +43,9 @@
         function collectTotal(acc, entry){
             updateLandingSiteIfNecessary(acc, entry);
             var record = {key:entry.species, value:getEntryValue(entry)}
+            if(entry.fisher_name){
+                record.fisher = StringUtil.capitalise(entry.fisher_name);
+            }
             acc.speciesInfo.push(record);
             return acc;
         }
@@ -80,6 +83,7 @@
         }
 
         var handleResponse = function(result){
+            console.log(result);
             ctrl.loading = false;
             responseData = result.records;
             refreshBus.post(false);
