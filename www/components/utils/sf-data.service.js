@@ -98,7 +98,7 @@
             }
 
             const lastNTripDates = function (nummberOfDays) {
-                var query = 'SELECT id FROM Ablb_Fisher_Trip__c ORDER BY trip_date__c DESC LIMIT '+nummberOfDays;
+                var query = "SELECT id FROM Ablb_Fisher_Trip__c WHERE catch_has__c='yes' ORDER BY trip_date__c DESC LIMIT "+nummberOfDays;
                 return force.query(query);
             }
 
