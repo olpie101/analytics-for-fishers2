@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    var recentTripsController = function RecentTripsController(force, sfdata, refreshBus){
+    var recentTripsController = function RecentTripsController(force, sfdata, refreshBus, StringUtil){
         var ctrl = this;
         ctrl.loading = false;
         var responseData;
@@ -41,15 +41,23 @@
         }
 
         function collectTotal(acc, entry){
-            if(typeof acc.site === 'undefined'){
-                if(typeof entry.site === 'undefined' || entry.site == null){
+            updateLandingSiteIfNecessary(acc, entry);
+            var record = {key:entry.species, value:getEntryValue(entry)}
+            acc.speciesInfo.push(record);
+            return acc;
+        }
+
+        function updateLandingSiteIfNecessary(acc, entry){
+            if(typeof acc.site === 'undefined' || acc.site == "Unknown"){
+                if((typeof entry.site === 'undefined' || entry.site == null) &&
+                 (typeof entry.site_back_up === 'undefined' || entry.site_back_up == null)){
                     acc.site = "Unknown";
-                } else {
+                } else if (typeof entry.site !== 'undefined' && entry.site != null) {
                     acc.site = entry.site.substring(entry.site.indexOf('-')+1);
+                } else if (typeof entry.site_back_up !== 'undefined' || entry.site_back_up != null) {
+                    acc.site = StringUtil.capitalise(entry.site_back_up.substring(0, entry.site_back_up.indexOf('_')));
                 }
             }
-            acc.speciesInfo.push({key:entry.species, value:getEntryValue(entry)});
-            return acc;
         }
 
         function createRecord(key, totals){

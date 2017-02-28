@@ -16,6 +16,12 @@
                     return str;
                 },
 
+                capitalise: function(str, separator = " ") {
+                    return str.split(separator)
+                            .map(x => x.substring(0,1).toUpperCase()+x.substring(1))
+                            .join(' ');
+                },
+
                 // Sorts the items according to species pushing "Other"
                 // to the end of the list
                 otherAtEndcomparator: function (a, b) {

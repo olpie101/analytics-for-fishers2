@@ -110,12 +110,26 @@
                      var queryList = result.records.map(record => "'"+record.Id+"'").join(',');
                      var query = "SELECT parent_trip__r.trip_date__c date, "+
                      "parent_trip__r.lkup_landing_site__r.name_eng__c site, "+ //site doesn't alias but is needed to remove abiguity
-                     "lkup_species__r.name_eng__c species, SUM(num_items__c) items, "+
+                     "parent_trip__r.landing_site__c site_back_up, "+ //site doesn't alias but is needed to remove abiguity
+                     "lkup_species__r.name_eng__c species, ";
+
+                     if(userservice.userType() == "fisher_manager"){
+                         query += "parent_trip__r.lkup_main_fisher_id__r.Name fisher_name, ";
+                     }
+
+                     query += "SUM(num_items__c) items, "+
                      "SUM(weight_kg__c) weight, SUM(num_crates__c) crates "+
                      "FROM Ablb_Fisher_Catch__c "+
                      "WHERE parent_trip__c IN ("+queryList+") "+
                      "GROUP BY parent_trip__r.trip_date__c, "+
-                     "parent_trip__r.lkup_landing_site__r.name_eng__c, lkup_species__r.name_eng__c "+
+                     "parent_trip__r.lkup_landing_site__r.name_eng__c, "+
+                     "parent_trip__r.landing_site__c, ";
+
+                     if(userservice.userType() == "fisher_manager"){
+                         query += "parent_trip__r.lkup_main_fisher_id__r.Name, ";
+                     }
+
+                     query += "lkup_species__r.name_eng__c "+
                      "ORDER BY parent_trip__r.trip_date__c DESC NULLS LAST";
 
                      return force.query(query);
