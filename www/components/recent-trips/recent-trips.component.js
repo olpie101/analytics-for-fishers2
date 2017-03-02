@@ -51,16 +51,14 @@
         }
 
         function updateLandingSiteIfNecessary(acc, entry){
-            if(typeof acc.site === 'undefined' || acc.site == "Unknown"){
                 if((typeof entry.site === 'undefined' || entry.site == null) &&
                  (typeof entry.site_back_up === 'undefined' || entry.site_back_up == null)){
-                    acc.site = "Unknown";
+                    acc.site = StringUtil.capitalise(entry.community);
                 } else if (typeof entry.site !== 'undefined' && entry.site != null) {
                     acc.site = entry.site.substring(entry.site.indexOf('-')+1);
                 } else if (typeof entry.site_back_up !== 'undefined' || entry.site_back_up != null) {
                     acc.site = StringUtil.capitalise(entry.site_back_up.substring(0, entry.site_back_up.indexOf('_')));
                 }
-            }
         }
 
         function createRecord(key, totals){

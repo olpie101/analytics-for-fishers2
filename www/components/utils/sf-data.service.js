@@ -111,6 +111,7 @@
                      var query = "SELECT parent_trip__r.trip_date__c date, "+
                      "parent_trip__r.lkup_landing_site__r.name_eng__c site, "+ //site doesn't alias but is needed to remove abiguity
                      "parent_trip__r.landing_site__c site_back_up, "+ //site doesn't alias but is needed to remove abiguity
+                     "parent_trip__r.lkup_community__r.Name community, "+
                      "lkup_species__r.name_eng__c species, ";
 
                      if(userservice.userType() == "fisher_manager"){
@@ -123,7 +124,8 @@
                      "WHERE parent_trip__c IN ("+queryList+") "+
                      "GROUP BY parent_trip__r.trip_date__c, "+
                      "parent_trip__r.lkup_landing_site__r.name_eng__c, "+
-                     "parent_trip__r.landing_site__c, ";
+                     "parent_trip__r.landing_site__c, "+
+                     "parent_trip__r.lkup_community__r.Name, ";
 
                      if(userservice.userType() == "fisher_manager"){
                          query += "parent_trip__r.lkup_main_fisher_id__r.Name, ";
