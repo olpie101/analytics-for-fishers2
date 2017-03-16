@@ -10,7 +10,7 @@
             <li class="infoEntry" ng-repeat="entry in record.speciesInfo">
                 <span class="infoEntryKey">{{entry.key}}</span><span class="infoEntryValue">{{entry.value}}</span>
                 <br ng-if="entry.fisher"/>
-                <span ng-if="entry.fisher">{{entry.fisher}}</span>
+                <span class="infoEntryFisherName" ng-if="entry.fisher">{{entry.fisher}}</span>
             </li>
         </ul>
     </div>
