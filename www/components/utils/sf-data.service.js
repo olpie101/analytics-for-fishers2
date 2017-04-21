@@ -12,6 +12,9 @@
                 }
             }];
             var fisherList = null;
+            var userIsManager;
+            userservice.userType()
+                .then(result => userIsManager = result == "fisher_manager");
 
             const intervalQuerySelectSection = function (interval, parentPrefix = "") {
                 switch (interval) {
@@ -79,7 +82,7 @@
                         'SUM(num_crates__c) crates '+
                         'FROM Ablb_Fisher_Catch__c ';
 
-                if(userservice.userType() == "fisher_manager" &&
+                if(userIsManager &&
                     forFisher && forFisher != null && forFisher != "All"){
                     query += "WHERE parent_trip__r.lkup_main_fisher_id__c = '"+forFisher+"' ";
                 }
@@ -114,7 +117,7 @@
                      "parent_trip__r.lkup_community__r.Name community, "+
                      "lkup_species__r.name_eng__c species, ";
 
-                     if(userservice.userType() == "fisher_manager"){
+                     if(userIsManager){
                          query += "parent_trip__r.lkup_main_fisher_id__r.Name fisher_name, ";
                      }
 
@@ -127,12 +130,14 @@
                      "parent_trip__r.landing_site__c, "+
                      "parent_trip__r.lkup_community__r.Name, ";
 
-                     if(userservice.userType() == "fisher_manager"){
+                     if(userIsManager){
                          query += "parent_trip__r.lkup_main_fisher_id__r.Name, ";
                      }
 
                      query += "lkup_species__r.name_eng__c "+
                      "ORDER BY parent_trip__r.trip_date__c DESC NULLS LAST";
+
+                     console.log(query);
 
                      return force.query(query);
                  }
@@ -163,7 +168,7 @@
                         "WHERE cost_has__c ='yes' AND trip_date__c > "+
                         timeThreshold.toISOString().substring(0,10)+" ";
 
-                if(userservice.userType() == "fisher_manager" &&
+                if(userIsManager &&
                     forFisher && forFisher != null && forFisher != "All"){
                     query += "AND lkup_main_fisher_id__c = '"+forFisher+"' ";
                 }
@@ -197,7 +202,7 @@
                         "FROM Ablb_Fisher_Catch__c WHERE parent_trip__r.trip_date__c > "+
                         timeThreshold.toISOString().substring(0,10)+" ";
 
-                if(userservice.userType() == "fisher_manager" &&
+                if(userIsManager &&
                     forFisher && forFisher != null && forFisher != "All"){
                     query += "AND parent_trip__r.lkup_main_fisher_id__c = '"+forFisher+"' ";
                 }
@@ -251,7 +256,7 @@
                 "WHERE trip_date__c > "+
                 lastYear.toISOString().substring(0,10)+" "+
                 "AND lkup_main_fisher_id__c != ''";
-                if(userservice.userType() == "fisher_manager") {
+                if(userIsManager) {
                     if(fisherList == null){
                         return Promise.resolve(force.query(query).then(result => {
                             fisherList = result.records;

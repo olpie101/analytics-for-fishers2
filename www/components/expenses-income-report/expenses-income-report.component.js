@@ -24,7 +24,8 @@
                 .filter(evt => evt)
                 .subscribe(evt => requestData());
             refreshBus.post(null);
-            ctrl.isManager = userservice.userType() == "fisher_manager";
+            userservice.userType()
+                .then(result => ctrl.isManager = result == "fisher_manager");
         }
 
         function requestData(){
