@@ -8,7 +8,7 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
                 'stackedBarChartModule', 'doubleSidedToggleModule', 'catchByTimePeriodModule',
                 'utilsModule', 'loadingOverlayModule', 'recentTripsModule',
                 'expensesIncomeReportModule', 'catchDaysModule', 'evolutionOfPricesModule',
-                'lineChartModule', 'refreshButtonModule'])
+                'lineChartModule', 'refreshButtonModule', 'reportMailerModule'])
 
   .run(function ($ionicPlatform, $state, force, forcengOptions, userservice) {
 
@@ -135,6 +135,14 @@ angular.module('starter', ['ionic', 'forceng', 'starter.controllers', 'config', 
         views: {
           'menuContent': {
             templateUrl: baseURL + "templates/evolution-of-prices.html"
+          }
+        }
+      })
+      .state('app.reportmailer', {
+        url: "/report-mailer",
+        views: {
+          'menuContent': {
+            templateUrl: baseURL + "templates/report-mailer.html"
           }
         }
       });

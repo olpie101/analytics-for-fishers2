@@ -71,7 +71,8 @@
             return {
                 userType: userType,
                 userId: Id,
-                userEmail: userEmail
+                userEmail: userEmail,
+                pdfMailerUri: "" // ip address/url of pdf mailer
             };
         });
 })();
