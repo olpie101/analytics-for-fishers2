@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    const reportMailerController = function reportMailerController (userservice, $http) {
+    const reportMailerController = function reportMailerController (userservice, $http, $timeout) {
         var ctrl = this;
         var emailPromise = userservice.userEmail();
         var userIdPromise = userservice.userId();
@@ -14,6 +14,11 @@
                 console.log("email -> "+result);
                 ctrl.email = result;
             });
+        }
+
+        ctrl.getemail = function() {
+            $timeout(function(){}, 2000);
+            return ctrl.email;
         }
 
         ctrl.send = function() {
