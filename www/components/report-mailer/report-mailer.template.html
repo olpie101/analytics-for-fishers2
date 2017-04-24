@@ -3,7 +3,7 @@
         <span class="input-label">Address to email data to?:</span>
         <input type="email" data-ng-model="$ctrl.email">
     </label>
-    <button ng-click="$ctrl.send()">Send</button>
+    <button class="button button-dark" ng-click="$ctrl.send()">Send</button>
     <p ng-if="$ctrl.requestStatus > 0">Your report will be sent to the email provided shortly</p>
     <p ng-if="$ctrl.requestStatus < 0">There was an error generating and sending your report</p>
 </div>

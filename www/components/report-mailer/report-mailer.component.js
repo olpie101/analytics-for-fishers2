@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    const reportMailerController = function reportMailerController (userservice, $http) {
+    const reportMailerController = function reportMailerController (userservice, $http, $scope) {
         var ctrl = this;
         var emailPromise = userservice.userEmail();
         var userIdPromise = userservice.userId();
@@ -13,6 +13,8 @@
             emailPromise.then(result => {
                 console.log("email -> "+result);
                 ctrl.email = result;
+
+                $scope.$apply();
             });
         }
 
