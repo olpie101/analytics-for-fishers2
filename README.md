@@ -18,10 +18,11 @@ You'll need to install the correct version of cordova:
 
 ### Installation
 * Clone this repo and enter the directory
+* Run `npm install`
 * Install `shelljs 0.7.0` by running `npm install shelljs@0.7.0`
 * Run `bower install`
 * Ensure that you `ANDROID_HOME` environment variable is set and correctly points to the directory where your Android SDK is located, otherwise the remaining steps will fail.
-* Install the SalesForce SDK by running `cordova plugin add com.salesforce`
+* Install the SalesForce SDK by running `cordova plugin add https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin\#v4.3.1`
 * Add the Android plugin `cordova platform add android`
 * Open the file `platforms/android/gradle/wrapper/gradle-wrapper.properties` and change the version number for the `distributionUrl` for the gradle wrapper from `2.12` to `2.2`
 
