@@ -1,3 +1,5 @@
+**NB: This repository is no longer maintained. Please refer to the updated version here: [Abalobi Analytics 3](https://github.com/AbalobiSA/analytics-for-fishers-3)**
+
 This is a hybrid local app running on Cordova, using Ionic, AngularJS and the SalesForce App SDK. More information on this can be found at the  [Salesforce Getting Started Guide](https://trailhead.salesforce.com/mobile_sdk_hybrid/mobilesdk_hybrid_getting_started).
 
 
